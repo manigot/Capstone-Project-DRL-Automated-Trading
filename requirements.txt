@@ -4,6 +4,7 @@ pandas
 stockstats
 scikit-learn
 gym
+shimmy
 stable-baselines3[mpi]
 tensorflow
 
