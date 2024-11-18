@@ -1,12 +1,14 @@
+import gym
+import matplotlib
 import numpy as np
 import pandas as pd
-from gym.utils import seeding
-import gym
 from gym import spaces
-import matplotlib
+from gym.utils import seeding
+
 matplotlib.use('Agg')
+# import pickle
+
 import matplotlib.pyplot as plt
-import pickle
 
 # shares normalization factor
 # 100 shares per trade
