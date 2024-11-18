@@ -61,12 +61,25 @@ To activate a virtualenv:
 source venv/bin/activate
 ```
 
+### Create and Activate Conda Environment (Optional but highly recommended)
+
+Create a **conda** environment
+```bash
+conda create -n capstone python=3.12
+```
+To activate a virtualenv:
+```bash
+conda ativate capstone
+```
+
 ## Dependencies
 
 The script has been tested running under **Python >= 3.6.0**, with the folowing packages installed:
 
 ```shell
 pip install -r requirements.txt
+pip install -r requirements_for_devs/requirements-check-code-format.txt
+pip install -r requirements_for_devs/requirements-check-code-format.txt
 ```
 
 ### Questions
