@@ -1,24 +1,24 @@
 # Model Building Requirements
-numpy
-pandas
-stockstats
-scikit-learn
-gym
-shimmy
-stable-baselines3[mpi]
-tensorflow
+numpy==1.26.4
+pandas==2.2.3
+stockstats==0.6.2
+scikit-learn==1.5.2
+gym==0.26.2
+shimmy==2.0.0
+stable-baselines3[mpi]==2.4.0
+tensorflow==2.18.0
 
-joblib
+joblib==1.4.2
 
 # plot
-matplotlib
+matplotlib==3.9.2
 
 # testing requirements
-pytest
+pytest==8.3.3
 
 # packaging
-setuptools
-wheel
+setuptools==75.1.0
+wheel==0.44.0
 
 
 
