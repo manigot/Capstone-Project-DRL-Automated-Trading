@@ -6,7 +6,7 @@ from gym import spaces
 from gym.utils import seeding
 
 matplotlib.use('Agg')
-import pickle
+# import pickle
 
 import matplotlib.pyplot as plt
 
@@ -28,7 +28,7 @@ class StockEnvTrade(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df,day = 0,turbulence_threshold=140
+    def __init__(self, df:pd.DataFrame,day = 0,turbulence_threshold=140
                  ,initial=True, previous_state=[], model_name='', iteration=''):
         #super(StockEnv, self).__init__()
         #money = 10 , scope = 1
@@ -45,14 +45,14 @@ class StockEnvTrade(gym.Env):
         self.data = self.df.loc[self.day,:]
         self.terminal = False     
         self.turbulence_threshold = turbulence_threshold
-        # initalize state
+        # initialize state
         self.state = [INITIAL_ACCOUNT_BALANCE] + \
-                      self.data.adjcp.values.tolist() + \
-                      [0]*STOCK_DIM + \
-                      self.data.macd.values.tolist() + \
-                      self.data.rsi.values.tolist() + \
-                      self.data.cci.values.tolist() + \
-                      self.data.adx.values.tolist()
+                     self.data['adjcp'].to_numpy().tolist() + \
+                     [0] * STOCK_DIM + \
+                     self.data['macd'].to_numpy().tolist() + \
+                     self.data['rsi'].to_numpy().tolist() + \
+                     self.data['cci'].to_numpy().tolist() + \
+                     self.data['adx'].to_numpy().tolist()
         # initialize reward
         self.reward = 0
         self.turbulence = 0
@@ -180,13 +180,13 @@ class StockEnvTrade(gym.Env):
             #print(self.turbulence)
             #load next state
             # print("stock_shares:{}".format(self.state[29:]))
-            self.state =  [self.state[0]] + \
-                    self.data.adjcp.values.tolist() + \
-                    list(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]) + \
-                    self.data.macd.values.tolist() + \
-                    self.data.rsi.values.tolist() + \
-                    self.data.cci.values.tolist() + \
-                    self.data.adx.values.tolist()
+            self.state = [self.state[0]] + \
+                         self.data['adjcp'].to_numpy().tolist() + \
+                         list(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)]) + \
+                         self.data['macd'].to_numpy().tolist() + \
+                         self.data['rsi'].to_numpy().tolist() + \
+                         self.data['cci'].to_numpy().tolist() + \
+                         self.data['adx'].to_numpy().tolist()
             
             end_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
@@ -202,50 +202,25 @@ class StockEnvTrade(gym.Env):
 
         return self.state, self.reward, self.terminal, {}
 
-    def reset(self):  
-        if self.initial:
-            self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
-            self.day = 0
-            self.data = self.df.loc[self.day,:]
-            self.turbulence = 0
-            self.cost = 0
-            self.trades = 0
-            self.terminal = False 
-            #self.iteration=self.iteration
-            self.rewards_memory = []
-            #initiate state
-            self.state = [INITIAL_ACCOUNT_BALANCE] + \
-                          self.data.adjcp.values.tolist() + \
-                          [0]*STOCK_DIM + \
-                          self.data.macd.values.tolist() + \
-                          self.data.rsi.values.tolist()  + \
-                          self.data.cci.values.tolist()  + \
-                          self.data.adx.values.tolist() 
-        else:
-            previous_total_asset = self.previous_state[0]+ \
-            sum(np.array(self.previous_state[1:(STOCK_DIM+1)])*np.array(self.previous_state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
-            self.asset_memory = [previous_total_asset]
-            #self.asset_memory = [self.previous_state[0]]
-            self.day = 0
-            self.data = self.df.loc[self.day,:]
-            self.turbulence = 0
-            self.cost = 0
-            self.trades = 0
-            self.terminal = False 
-            #self.iteration=iteration
-            self.rewards_memory = []
-            #initiate state
-            #self.previous_state[(STOCK_DIM+1):(STOCK_DIM*2+1)]
-            #[0]*STOCK_DIM + \
-
-            self.state = [ self.previous_state[0]] + \
-                          self.data.adjcp.values.tolist() + \
-                          self.previous_state[(STOCK_DIM+1):(STOCK_DIM*2+1)]+ \
-                          self.data.macd.values.tolist() + \
-                          self.data.rsi.values.tolist()  + \
-                          self.data.cci.values.tolist()  + \
-                          self.data.adx.values.tolist() 
-            
+    def reset(self):
+        self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
+        self.day = 0
+        self.data = self.df.loc[self.day]
+        self.turbulence = 0
+        self.cost = 0
+        self.trades = 0
+        self.terminal = False
+        self.rewards_memory = []
+        
+        # Initialize the state using .to_numpy() for compatibility with Pandas 2.x
+        self.state = [INITIAL_ACCOUNT_BALANCE] + \
+                    self.data['adjcp'].to_numpy().tolist() + \
+                    [0] * STOCK_DIM + \
+                    self.data['macd'].to_numpy().tolist() + \
+                    self.data['rsi'].to_numpy().tolist() + \
+                    self.data['cci'].to_numpy().tolist() + \
+                    self.data['adx'].to_numpy().tolist()
+        
         return self.state
     
     def render(self, mode='human',close=False):

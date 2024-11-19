@@ -28,7 +28,7 @@ class StockEnvValidation(gym.Env):
     """A stock trading environment for OpenAI gym"""
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df, day = 0, turbulence_threshold=140, iteration=''):
+    def __init__(self, df:pd.DataFrame, day = 0, turbulence_threshold=140, iteration=''):
         #super(StockEnv, self).__init__()
         #money = 10 , scope = 1
         self.day = day
@@ -42,14 +42,14 @@ class StockEnvValidation(gym.Env):
         self.data = self.df.loc[self.day,:]
         self.terminal = False     
         self.turbulence_threshold = turbulence_threshold
-        # initalize state
+        # Initialize state
         self.state = [INITIAL_ACCOUNT_BALANCE] + \
-                      self.data.adjcp.values.tolist() + \
-                      [0]*STOCK_DIM + \
-                      self.data.macd.values.tolist() + \
-                      self.data.rsi.values.tolist() + \
-                      self.data.cci.values.tolist() + \
-                      self.data.adx.values.tolist()
+                     self.data['adjcp'].to_numpy().tolist() + \
+                     [0] * STOCK_DIM + \
+                     self.data['macd'].to_numpy().tolist() + \
+                     self.data['rsi'].to_numpy().tolist() + \
+                     self.data['cci'].to_numpy().tolist() + \
+                     self.data['adx'].to_numpy().tolist()
         # initialize reward
         self.reward = 0
         self.turbulence = 0
@@ -176,13 +176,14 @@ class StockEnvValidation(gym.Env):
             #print(self.turbulence)
             #load next state
             # print("stock_shares:{}".format(self.state[29:]))
-            self.state =  [self.state[0]] + \
-                    self.data.adjcp.values.tolist() + \
-                    list(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]) + \
-                    self.data.macd.values.tolist() + \
-                    self.data.rsi.values.tolist() + \
-                    self.data.cci.values.tolist() + \
-                    self.data.adx.values.tolist()
+            # Update state
+            self.state = [self.state[0]] + \
+                         self.data['adjcp'].to_numpy().tolist() + \
+                         list(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)]) + \
+                         self.data['macd'].to_numpy().tolist() + \
+                         self.data['rsi'].to_numpy().tolist() + \
+                         self.data['cci'].to_numpy().tolist() + \
+                         self.data['adx'].to_numpy().tolist()
             
             end_total_asset = self.state[0]+ \
             sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):(STOCK_DIM*2+1)]))
@@ -209,12 +210,12 @@ class StockEnvValidation(gym.Env):
         self.rewards_memory = []
         #initiate state
         self.state = [INITIAL_ACCOUNT_BALANCE] + \
-                      self.data.adjcp.values.tolist() + \
-                      [0]*STOCK_DIM + \
-                      self.data.macd.values.tolist() + \
-                      self.data.rsi.values.tolist()  + \
-                      self.data.cci.values.tolist()  + \
-                      self.data.adx.values.tolist() 
+                     self.data['adjcp'].to_numpy().tolist() + \
+                     [0] * STOCK_DIM + \
+                     self.data['macd'].to_numpy().tolist() + \
+                     self.data['rsi'].to_numpy().tolist() + \
+                     self.data['cci'].to_numpy().tolist() + \
+                     self.data['adx'].to_numpy().tolist()
             
         return self.state
     
