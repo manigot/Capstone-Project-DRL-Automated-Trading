@@ -93,13 +93,13 @@ pip install tensorflow==1.15.4
  ```
 
 If you have questions regarding Stable-baselines package, please refer to [Stable-baselines installation guide](https://github.com/hill-a/stable-baselines). Install the Stable Baselines package using pip:
-```
-pip install stable-baselines[mpi]
+```bash
+pip install stable-baselines3[mpi]
 ```
 
 This includes an optional dependency on MPI, enabling algorithms DDPG, GAIL, PPO1 and TRPO. If you do not need these algorithms, you can install without MPI:
-```
-pip install stable-baselines
+```bash
+pip install stable-baselines3
 ```
 
 Please read the [documentation](https://stable-baselines.readthedocs.io/) for more details and alternatives (from source, using docker).
