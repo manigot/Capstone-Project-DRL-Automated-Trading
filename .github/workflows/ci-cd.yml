@@ -80,7 +80,7 @@ jobs:
       - name: Install Documentation Generator
         run: |
           pip install -r requirements_for_devs/requirements-documentation.txt
-          # pip install -r requirements.txt
+          pip install -r requirements.txt
 
       - name: Build Documentation
         run: |
