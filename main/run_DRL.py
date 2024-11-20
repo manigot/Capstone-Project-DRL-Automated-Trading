@@ -1,17 +1,22 @@
 # common library
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 import pandas as pd
+from model.models import run_ensemble_strategy
+from preprocessing.preprocessors import add_turbulence, preprocess_data
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 # preprocessor
 # from preprocessing.preprocessors import *
 # config
 # from config.config import *
 # model
-# from model.models_old import add_turbulence, preprocess_data, run_ensemble_strategy
-from model.models import run_ensemble_strategy
-from preprocessing.preprocessors import add_turbulence, preprocess_data
+# from model.models_old import add_turbulence,
+# preprocess_data, run_ensemble_strategy
+
 
 # import numpy as np
 # import time
