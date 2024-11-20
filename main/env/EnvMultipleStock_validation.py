@@ -17,12 +17,13 @@ STOCK_DIM = 30  # Number of stocks in the portfolio
 TRANSACTION_FEE_PERCENT = 0.001  # Transaction fee percentage
 REWARD_SCALING = 1e-4  # Reward scaling factor
 
+
 class StockEnvValidation(gym.Env):
     """
     A stock trading environment for OpenAI Gym where agents simulate stock trading.
 
-    This environment allows agents to interact with historical stock data to take actions such as 
-    buying, selling, or holding stocks. The environment includes stock prices, technical indicators, 
+    This environment allows agents to interact with historical stock data to take actions such as
+    buying, selling, or holding stocks. The environment includes stock prices, technical indicators,
     and market turbulence as features for the agent to consider when making decisions.
 
     Attributes:
@@ -85,7 +86,7 @@ class StockEnvValidation(gym.Env):
             index (int): The index of the stock to be sold.
             action (float): The amount of stock to be sold.
 
-        This method checks the turbulence condition and performs the sell action if applicable. 
+        This method checks the turbulence condition and performs the sell action if applicable.
         It updates the account balance, stock holdings, and transaction costs.
         """
         if self.turbulence < self.turbulence_threshold:
@@ -95,7 +96,9 @@ class StockEnvValidation(gym.Env):
                     * min(abs(action), self.state[index + STOCK_DIM + 1])
                     * (1 - TRANSACTION_FEE_PERCENT)
                 )
-                self.state[index + STOCK_DIM + 1] -= min(abs(action), self.state[index + STOCK_DIM + 1])
+                self.state[index + STOCK_DIM + 1] -= min(
+                    abs(action), self.state[index + STOCK_DIM + 1]
+                )
                 self.cost += (
                     self.state[index + 1]
                     * min(abs(action), self.state[index + STOCK_DIM + 1])
@@ -125,7 +128,7 @@ class StockEnvValidation(gym.Env):
             index (int): The index of the stock to be bought.
             action (float): The amount of stock to be bought.
 
-        This method checks the turbulence condition and performs the buy action if applicable. 
+        This method checks the turbulence condition and performs the buy action if applicable.
         It updates the account balance, stock holdings, and transaction costs.
         """
         if self.turbulence < self.turbulence_threshold:

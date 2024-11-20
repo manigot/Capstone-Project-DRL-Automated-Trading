@@ -19,7 +19,7 @@ REWARD_SCALING = 1e-4  # Scaling factor for rewards
 class StockEnvTrain(gym.Env):
     """
     A stock trading environment for OpenAI Gym, designed to simulate stock trading activities.
-    The environment allows an agent to perform buy and sell actions on a portfolio of stocks 
+    The environment allows an agent to perform buy and sell actions on a portfolio of stocks
     and rewards it based on the change in the total asset value.
 
     Attributes:
@@ -84,7 +84,9 @@ class StockEnvTrain(gym.Env):
         """
         if self.state[index + STOCK_DIM + 1] > 0:
             sell_amount = min(abs(action), self.state[index + STOCK_DIM + 1])
-            self.state[0] += self.state[index + 1] * sell_amount * (1 - TRANSACTION_FEE_PERCENT)
+            self.state[0] += (
+                self.state[index + 1] * sell_amount * (1 - TRANSACTION_FEE_PERCENT)
+            )
             self.state[index + STOCK_DIM + 1] -= sell_amount
             self.cost += self.state[index + 1] * sell_amount * TRANSACTION_FEE_PERCENT
             self.trades += 1
@@ -99,7 +101,9 @@ class StockEnvTrain(gym.Env):
         """
         available_amount = self.state[0] // self.state[index + 1]
         buy_amount = min(available_amount, action)
-        self.state[0] -= self.state[index + 1] * buy_amount * (1 + TRANSACTION_FEE_PERCENT)
+        self.state[0] -= (
+            self.state[index + 1] * buy_amount * (1 + TRANSACTION_FEE_PERCENT)
+        )
         self.state[index + STOCK_DIM + 1] += buy_amount
         self.cost += self.state[index + 1] * buy_amount * TRANSACTION_FEE_PERCENT
         self.trades += 1
@@ -112,7 +116,7 @@ class StockEnvTrain(gym.Env):
             actions (np.array): Array of actions taken by the agent (scaled between -1 and 1 for each stock).
 
         Returns:
-            tuple: 
+            tuple:
                 - state (list): The updated state after the actions.
                 - reward (float): The reward based on the change in total asset value.
                 - terminal (bool): Whether the episode is over.
@@ -128,8 +132,8 @@ class StockEnvTrain(gym.Env):
         begin_total_asset = self._calculate_total_asset()
 
         # Execute trades
-        sell_index = np.argsort(actions)[:np.where(actions < 0)[0].shape[0]]
-        buy_index = np.argsort(actions)[::-1][:np.where(actions > 0)[0].shape[0]]
+        sell_index = np.argsort(actions)[: np.where(actions < 0)[0].shape[0]]
+        buy_index = np.argsort(actions)[::-1][: np.where(actions > 0)[0].shape[0]]
         for index in sell_index:
             self._sell_stock(index, actions[index])
         for index in buy_index:
@@ -200,7 +204,7 @@ class StockEnvTrain(gym.Env):
 
     def _save_results(self):
         """
-        Saves the results of the trading session, including plotting the asset value 
+        Saves the results of the trading session, including plotting the asset value
         and saving it to a file, and storing the daily return data as a CSV.
         """
         plt.plot(self.asset_memory, "r")
@@ -213,14 +217,15 @@ class StockEnvTrain(gym.Env):
 
     def _calculate_total_asset(self):
         """
-        Calculates the total asset value, which is the sum of the available cash 
+        Calculates the total asset value, which is the sum of the available cash
         and the value of the owned stocks.
 
         Returns:
             float: The total asset value.
         """
         return self.state[0] + sum(
-            np.array(self.state[1 : STOCK_DIM + 1]) * np.array(self.state[STOCK_DIM + 1 : STOCK_DIM * 2 + 1])
+            np.array(self.state[1 : STOCK_DIM + 1])
+            * np.array(self.state[STOCK_DIM + 1 : STOCK_DIM * 2 + 1])
         )
 
     def _update_state(self):
