@@ -4,19 +4,16 @@ import time
 # import gym
 import numpy as np
 import pandas as pd
-
 # RL models from stable-baselines3
 from stable_baselines3 import A2C, DDPG, PPO  # , SAC, TD3
-from stable_baselines3.common.noise import (
-    OrnsteinUhlenbeckActionNoise,
-)  # NormalActionNoise,
+from stable_baselines3.common.noise import \
+    OrnsteinUhlenbeckActionNoise  # NormalActionNoise,
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from config import config
 from env.EnvMultipleStock_trade import StockEnvTrade
 from env.EnvMultipleStock_train import StockEnvTrain
 from env.EnvMultipleStock_validation import StockEnvValidation
-
 # Customized environment imports
 from preprocessing.preprocessors import data_split
 
@@ -57,18 +54,18 @@ def train_DDPG(env_train, model_name, timesteps=10000):
 
 # Prediction and validation functions
 def DRL_prediction(
-    df,
+    df: pd.DataFrame,
     model,
-    name,
-    last_state,
-    iter_num,
+    name: str,
+    last_state: list,
+    iter_num: int,
     unique_trade_date,
     rebalance_window,
     turbulence_threshold,
     initial,
 ):
     trade_data = data_split(
-        df,
+        df=df,
         start=unique_trade_date[iter_num - rebalance_window],
         end=unique_trade_date[iter_num],
     )
@@ -84,22 +81,32 @@ def DRL_prediction(
             )
         ]
     )
+
     obs_trade = env_trade.reset()
+    # print(obs_trade)
+    last_state = None  # Initialize
+    # print(f"Length of trade_data index: {len(trade_data.index.unique())}")
     for i in range(len(trade_data.index.unique())):
-        action, _states = model.predict(obs_trade)
-        obs_trade, rewards, dones, info = env_trade.step(action)
+        action, _ = model.predict(obs_trade)
+        _, _, _, _ = env_trade.step(action)
         if i == (len(trade_data.index.unique()) - 2):
-            last_state = env_trade.render()
+            # print(env_test.render())
+            last_state = env_trade.envs[0].render()
+
+
+    if last_state is None:
+        print("Warning: last_state is still None!")
+
     pd.DataFrame({"last_state": last_state}).to_csv(
-        f"results/last_state_{name}_{i}.csv", index=False
+        f"results/last_state_{name}_{iter_num}.csv", index=False
     )
     return last_state
 
 
 def DRL_validation(model, test_data, test_env, test_obs):
     for _ in range(len(test_data.index.unique())):
-        action, _states = model.predict(test_obs)
-        test_obs, rewards, dones, info = test_env.step(action)
+        action, _ = model.predict(test_obs)
+        test_obs, _, _, _ = test_env.step(action)
 
 
 def get_validation_sharpe(iteration):
@@ -117,21 +124,30 @@ def get_validation_sharpe(iteration):
 
 
 # Main ensemble strategy
-def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_window):
+def run_ensemble_strategy(
+    df: pd.DataFrame, unique_trade_date, rebalance_window, validation_window
+):
     print("============Start Ensemble Strategy============")
     last_state_ensemble = []
-    ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use = [], [], [], []
+    (ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use) = (
+        [],
+        [],
+        [],
+        [],
+    )
 
     insample_turbulence = df[
-        (df.datadate < 20151000) & (df.datadate >= 20090000)
+        (df["datadate"] < 20151000) & (df["datadate"] >= 20090000)
     ].drop_duplicates(subset=["datadate"])
     insample_turbulence_threshold = np.quantile(
-        insample_turbulence.turbulence.values, 0.90
+        insample_turbulence["turbulence"].values, 0.90
     )
 
     start = time.time()
     for i in range(
-        rebalance_window + validation_window, len(unique_trade_date), rebalance_window
+        rebalance_window + validation_window,
+        len(unique_trade_date),
+        rebalance_window,
     ):
         print("============================================")
         initial = i - rebalance_window - validation_window == 0
@@ -165,7 +181,13 @@ def run_ensemble_strategy(df, unique_trade_date, rebalance_window, validation_wi
             end=unique_trade_date[i - rebalance_window],
         )
         env_val = DummyVecEnv(
-            [lambda: StockEnvValidation(validation, turbulence_threshold, i)]
+            [
+                lambda: StockEnvValidation(
+                    df=validation,
+                    turbulence_threshold=turbulence_threshold,
+                    iteration=i,
+                )
+            ]
         )
         obs_val = env_val.reset()
 

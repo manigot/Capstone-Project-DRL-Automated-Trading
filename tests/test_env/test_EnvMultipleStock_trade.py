@@ -15,20 +15,40 @@ SEED = 42
 
 
 # Sample dataframe for testing
+
+# Sample dataframe for testing
 @pytest.fixture
 def mock_data():
     np.random.seed(SEED)  # Set the seed
     num_days = 5
     stock_dim = 30
+    dates = []
+    for i in range(num_days):
+        for _ in range(stock_dim):
+            dates.append(i)
+    tics = [f'stock_{i}' for i in range(stock_dim)]
+    turbulence = []
+    for i in range(num_days):
+        turb = np.random.rand()
+        for _ in range(stock_dim):
+            turbulence.append(turb)
     data = {
-        "adjcp": [np.random.rand(stock_dim) for _ in range(num_days)],
-        "macd": [np.random.rand(stock_dim) for _ in range(num_days)],
-        "rsi": [np.random.rand(stock_dim) for _ in range(num_days)],
-        "cci": [np.random.rand(stock_dim) for _ in range(num_days)],
-        "adx": [np.random.rand(stock_dim) for _ in range(num_days)],
-        "turbulence": [np.random.rand(1) for _ in range(num_days)],
+        "datadate": dates,
+        "tic": tics * num_days,
+        "adjcp": np.random.rand(num_days * stock_dim),
+        "open": np.random.rand(num_days * stock_dim),
+        "high": np.random.rand(num_days * stock_dim),
+        "low": np.random.rand(num_days * stock_dim),
+        "volume": np.random.rand(num_days * stock_dim) * 1e7,
+        "macd": np.random.rand(num_days * stock_dim),
+        "rsi": np.random.rand(num_days * stock_dim),
+        "cci": np.random.rand(num_days * stock_dim),
+        "adx": np.random.rand(num_days * stock_dim),
+        "turbulence":turbulence,
     }
-    return pd.DataFrame(data)
+    df = pd.DataFrame(data)
+    df.index = df["datadate"].factorize()[0]
+    return df
 
 
 @pytest.fixture
@@ -57,7 +77,7 @@ def test_step(stock_env: StockEnvTrade) -> None:
     """Test the step method with random actions."""
     np.random.seed(SEED)  # Set the seed for actions
     random_actions = np.random.uniform(-1, 1, size=(30,))
-    state, reward, terminal, info = stock_env.step(random_actions)
+    state, reward, terminal, _ = stock_env.step(random_actions)
 
     assert len(state) == 181  # Check state size
     assert isinstance(reward, float)  # Reward should be a float
