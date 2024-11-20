@@ -61,12 +61,25 @@ To activate a virtualenv:
 source venv/bin/activate
 ```
 
+### Create and Activate Conda Environment (Optional but highly recommended)
+
+Create a **conda** environment
+```bash
+conda create -n capstone python=3.12
+```
+To activate a virtualenv:
+```bash
+conda ativate capstone
+```
+
 ## Dependencies
 
 The script has been tested running under **Python >= 3.6.0**, with the folowing packages installed:
 
 ```shell
 pip install -r requirements.txt
+pip install -r requirements_for_devs/requirements-check-code-format.txt
+pip install -r requirements_for_devs/requirements-check-code-format.txt
 ```
 
 ### Questions
@@ -80,13 +93,13 @@ pip install tensorflow==1.15.4
  ```
 
 If you have questions regarding Stable-baselines package, please refer to [Stable-baselines installation guide](https://github.com/hill-a/stable-baselines). Install the Stable Baselines package using pip:
-```
-pip install stable-baselines[mpi]
+```bash
+pip install stable-baselines3[mpi]
 ```
 
 This includes an optional dependency on MPI, enabling algorithms DDPG, GAIL, PPO1 and TRPO. If you do not need these algorithms, you can install without MPI:
-```
-pip install stable-baselines
+```bash
+pip install stable-baselines3
 ```
 
 Please read the [documentation](https://stable-baselines.readthedocs.io/) for more details and alternatives (from source, using docker).
@@ -94,7 +107,7 @@ Please read the [documentation](https://stable-baselines.readthedocs.io/) for mo
 
 ## Run DRL Ensemble Strategy
 ```shell
-python run_DRL.py
+python3 main/run_DRL.py
 ```
 ## Backtesting
 

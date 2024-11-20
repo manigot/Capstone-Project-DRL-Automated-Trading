@@ -1,6 +1,7 @@
 # Custom config
 results/
-
+trained_models/
+test.ipynb
 
 # remove DS_Store
 **/.DS_Store
@@ -111,9 +112,9 @@ celerybeat.pid
 # Environments
 .env
 .venv
-env/
+# env/
 venv/
-ENV/
+# ENV/
 env.bak/
 venv.bak/
 
