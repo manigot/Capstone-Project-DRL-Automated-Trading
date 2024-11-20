@@ -1,3 +1,6 @@
+# Documentation
+[Documentation](https://louis-salletourne.github.io/Capstone-Project-DRL-Automated-Trading/)
+
 # Deep Reinforcement Learning for Automated Stock Trading: An Ensemble Strategy
 This repository provides codes for [ICAIF 2020 paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3690996)
 
@@ -80,6 +83,7 @@ The script has been tested running under **Python >= 3.6.0**, with the folowing 
 pip install -r requirements.txt
 pip install -r requirements_for_devs/requirements-check-code-format.txt
 pip install -r requirements_for_devs/requirements-check-code-format.txt
+pip install -r requirements_for_devs/requirements-documentation.txt
 ```
 
 ### Questions

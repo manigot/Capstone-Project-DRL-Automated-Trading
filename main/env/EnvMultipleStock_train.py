@@ -7,40 +7,56 @@ from gym import spaces
 from gym.utils import seeding
 
 matplotlib.use("Agg")
-# import pickle
 
-# shares normalization factor
-# 100 shares per trade
-HMAX_NORMALIZE = 100
-# initial amount of money we have in our account
-INITIAL_ACCOUNT_BALANCE = 1000000
-# total number of stocks in our portfolio
-STOCK_DIM = 30
-# transaction fee: 1/1000 reasonable percentage
-TRANSACTION_FEE_PERCENT = 0.001
-REWARD_SCALING = 1e-4
+# Constants
+HMAX_NORMALIZE = 100  # Normalization factor for shares
+INITIAL_ACCOUNT_BALANCE = 1_000_000  # Initial account balance
+STOCK_DIM = 30  # Number of stocks in the portfolio
+TRANSACTION_FEE_PERCENT = 0.001  # Transaction fee percentage
+REWARD_SCALING = 1e-4  # Scaling factor for rewards
 
 
 class StockEnvTrain(gym.Env):
-    """A stock trading environment for OpenAI gym"""
+    """
+    A stock trading environment for OpenAI Gym, designed to simulate stock trading activities.
+    The environment allows an agent to perform buy and sell actions on a portfolio of stocks
+    and rewards it based on the change in the total asset value.
+
+    Attributes:
+        metadata (dict): Metadata about the environment (e.g., render modes).
+        action_space (gym.spaces.Box): Action space representing the proportion of stocks to buy or sell.
+        observation_space (gym.spaces.Box): Observation space containing the environment's state.
+        df (pd.DataFrame): Dataframe containing historical stock data (e.g., adjusted close prices, technical indicators).
+        day (int): Current day in the simulation.
+        state (list): Current state of the environment, including account balance and stock data.
+        terminal (bool): Boolean flag indicating whether the episode has ended.
+        reward (float): Reward calculated based on asset change.
+        cost (float): Cost of transactions (fees).
+        trades (int): Count of executed trades.
+        asset_memory (list): List tracking the account balance over time.
+        rewards_memory (list): List tracking the rewards over time.
+    """
 
     metadata = {"render.modes": ["human"]}
 
     def __init__(self, df: pd.DataFrame, day=0):
-        # super(StockEnv, self).__init__()
-        # money = 10 , scope = 1
+        """
+        Initializes the stock trading environment with the given stock data.
+
+        Args:
+            df (pd.DataFrame): Dataframe containing historical stock data.
+            day (int, optional): Starting day for the simulation. Defaults to 0.
+        """
         self.day = day
         self.df = df
 
-        # action_space normalization and shape is STOCK_DIM
+        # Define action and observation spaces
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
-        # Shape = 181: [Current Balance]+[prices 1-30]+[owned shares 1-30]
-        # +[macd 1-30]+ [rsi 1-30] + [cci 1-30] + [adx 1-30]
         self.observation_space = spaces.Box(low=0, high=np.inf, shape=(181,))
-        # load data from a pandas dataframe
+
+        # Initialize environment state
         self.data = self.df.loc[self.day, :]
         self.terminal = False
-        # initalize state
         self.state = (
             [INITIAL_ACCOUNT_BALANCE]
             + self.data.adjcp.values.tolist()
@@ -50,152 +66,99 @@ class StockEnvTrain(gym.Env):
             + self.data.cci.values.tolist()
             + self.data.adx.values.tolist()
         )
-        # initialize reward
         self.reward = 0
         self.cost = 0
-        # memorize all the total balance change
+        self.trades = 0
         self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
         self.rewards_memory = []
-        self.trades = 0
-        # self.reset()
+
         self._seed()
 
     def _sell_stock(self, index, action):
-        # perform sell action based on the sign of the action
-        if self.state[index + STOCK_DIM + 1] > 0:
-            # update balance
-            self.state[0] += (
-                self.state[index + 1]
-                * min(abs(action), self.state[index + STOCK_DIM + 1])
-                * (1 - TRANSACTION_FEE_PERCENT)
-            )
+        """
+        Handles the logic for selling a stock.
 
-            self.state[index + STOCK_DIM + 1] -= min(
-                abs(action), self.state[index + STOCK_DIM + 1]
+        Args:
+            index (int): The index of the stock to be sold.
+            action (float): The amount of stock to sell.
+        """
+        if self.state[index + STOCK_DIM + 1] > 0:
+            sell_amount = min(abs(action), self.state[index + STOCK_DIM + 1])
+            self.state[0] += (
+                self.state[index + 1] * sell_amount * (1 - TRANSACTION_FEE_PERCENT)
             )
-            self.cost += (
-                self.state[index + 1]
-                * min(abs(action), self.state[index + STOCK_DIM + 1])
-                * TRANSACTION_FEE_PERCENT
-            )
+            self.state[index + STOCK_DIM + 1] -= sell_amount
+            self.cost += self.state[index + 1] * sell_amount * TRANSACTION_FEE_PERCENT
             self.trades += 1
-        else:
-            pass
 
     def _buy_stock(self, index, action):
-        # perform buy action based on the sign of the action
+        """
+        Handles the logic for buying a stock.
+
+        Args:
+            index (int): The index of the stock to be bought.
+            action (float): The amount of stock to buy.
+        """
         available_amount = self.state[0] // self.state[index + 1]
-        # print('available_amount:{}'.format(available_amount))
-
-        # update balance
+        buy_amount = min(available_amount, action)
         self.state[0] -= (
-            self.state[index + 1]
-            * min(available_amount, action)
-            * (1 + TRANSACTION_FEE_PERCENT)
+            self.state[index + 1] * buy_amount * (1 + TRANSACTION_FEE_PERCENT)
         )
-
-        self.state[index + STOCK_DIM + 1] += min(available_amount, action)
-
-        self.cost += (
-            self.state[index + 1]
-            * min(available_amount, action)
-            * TRANSACTION_FEE_PERCENT
-        )
+        self.state[index + STOCK_DIM + 1] += buy_amount
+        self.cost += self.state[index + 1] * buy_amount * TRANSACTION_FEE_PERCENT
         self.trades += 1
 
     def step(self, actions):
-        # print(self.day)
+        """
+        Executes a single step in the trading environment.
+
+        Args:
+            actions (np.array): Array of actions taken by the agent (scaled between -1 and 1 for each stock).
+
+        Returns:
+            tuple:
+                - state (list): The updated state after the actions.
+                - reward (float): The reward based on the change in total asset value.
+                - terminal (bool): Whether the episode is over.
+                - info (dict): Additional information, empty in this case.
+        """
         self.terminal = self.day >= len(self.df.index.unique()) - 1
-        # print(actions)
 
         if self.terminal:
-            plt.plot(self.asset_memory, "r")
-            plt.savefig("results/account_value_train.png")
-            plt.close()
-            end_total_asset = self.state[0] + sum(
-                np.array(self.state[1 : (STOCK_DIM + 1)])
-                * np.array(self.state[(STOCK_DIM + 1) : (STOCK_DIM * 2 + 1)])
-            )
-
-            # print("end_total_asset:{}".format(end_total_asset))
-            df_total_value = pd.DataFrame(self.asset_memory)
-            df_total_value.to_csv("results/account_value_train.csv")
-            # print("total_reward:{}".format(self.state[0]+sum(np.array(self.state[1:(STOCK_DIM+1)])*np.array(self.state[(STOCK_DIM+1):61]))- INITIAL_ACCOUNT_BALANCE ))
-            # print("total_cost: ", self.cost)
-            # print("total_trades: ", self.trades)
-            df_total_value.columns = ["account_value"]
-            df_total_value["daily_return"] = df_total_value.pct_change(1)
-            # sharpe = (
-            #     (252**0.5)
-            #     * df_total_value["daily_return"].mean()
-            #     / df_total_value["daily_return"].std()
-            # )
-            # print("Sharpe: ",sharpe)
-            # print("=================================")
-            # df_rewards = pd.DataFrame(self.rewards_memory)
-            # df_rewards.to_csv('results/account_rewards_train.csv')
-
-            # print('total asset: {}'.format(self.state[0]+ sum(np.array(self.state[1:29])*np.array(self.state[29:]))))
-            # with open('obs.pkl', 'wb') as f:
-            #    pickle.dump(self.state, f)
-
+            self._save_results()
             return self.state, self.reward, self.terminal, {}
 
-        else:
-            # print(np.array(self.state[1:29]))
+        actions = actions * HMAX_NORMALIZE
+        begin_total_asset = self._calculate_total_asset()
 
-            actions = actions * HMAX_NORMALIZE
-            # actions = (actions.astype(int))
+        # Execute trades
+        sell_index = np.argsort(actions)[: np.where(actions < 0)[0].shape[0]]
+        buy_index = np.argsort(actions)[::-1][: np.where(actions > 0)[0].shape[0]]
+        for index in sell_index:
+            self._sell_stock(index, actions[index])
+        for index in buy_index:
+            self._buy_stock(index, actions[index])
 
-            begin_total_asset = self.state[0] + sum(
-                np.array(self.state[1 : (STOCK_DIM + 1)])
-                * np.array(self.state[(STOCK_DIM + 1) : (STOCK_DIM * 2 + 1)])
-            )
-            # print("begin_total_asset:{}".format(begin_total_asset))
+        # Update environment state
+        self.day += 1
+        self.data = self.df.loc[self.day, :]
+        self.state = self._update_state()
 
-            argsort_actions = np.argsort(actions)
-
-            sell_index = argsort_actions[: np.where(actions < 0)[0].shape[0]]
-            buy_index = argsort_actions[::-1][: np.where(actions > 0)[0].shape[0]]
-
-            for index in sell_index:
-                # print('take sell action'.format(actions[index]))
-                self._sell_stock(index, actions[index])
-
-            for index in buy_index:
-                # print('take buy action: {}'.format(actions[index]))
-                self._buy_stock(index, actions[index])
-
-            self.day += 1
-            self.data = self.df.loc[self.day, :]
-            # load next state
-            # print("stock_shares:{}".format(self.state[29:]))
-            self.state = (
-                [self.state[0]]
-                + self.data.adjcp.values.tolist()
-                + list(self.state[(STOCK_DIM + 1) : (STOCK_DIM * 2 + 1)])
-                + self.data.macd.values.tolist()
-                + self.data.rsi.values.tolist()
-                + self.data.cci.values.tolist()
-                + self.data.adx.values.tolist()
-            )
-
-            end_total_asset = self.state[0] + sum(
-                np.array(self.state[1 : (STOCK_DIM + 1)])
-                * np.array(self.state[(STOCK_DIM + 1) : (STOCK_DIM * 2 + 1)])
-            )
-            self.asset_memory.append(end_total_asset)
-            # print("end_total_asset:{}".format(end_total_asset))
-
-            self.reward = end_total_asset - begin_total_asset
-            # print("step_reward:{}".format(self.reward))
-            self.rewards_memory.append(self.reward)
-
-            self.reward = self.reward * REWARD_SCALING
+        # Calculate reward
+        end_total_asset = self._calculate_total_asset()
+        self.reward = (end_total_asset - begin_total_asset) * REWARD_SCALING
+        self.asset_memory.append(end_total_asset)
+        self.rewards_memory.append(self.reward)
 
         return self.state, self.reward, self.terminal, {}
 
     def reset(self):
+        """
+        Resets the environment to its initial state.
+
+        Returns:
+            list: The initial state of the environment.
+        """
         self.asset_memory = [INITIAL_ACCOUNT_BALANCE]
         self.day = 0
         self.data = self.df.loc[self.day, :]
@@ -203,7 +166,6 @@ class StockEnvTrain(gym.Env):
         self.trades = 0
         self.terminal = False
         self.rewards_memory = []
-        # initiate state
         self.state = (
             [INITIAL_ACCOUNT_BALANCE]
             + self.data.adjcp.values.tolist()
@@ -213,12 +175,72 @@ class StockEnvTrain(gym.Env):
             + self.data.cci.values.tolist()
             + self.data.adx.values.tolist()
         )
-        # iteration += 1
         return self.state
 
     def render(self, mode="human"):
+        """
+        Renders the current state of the environment.
+
+        Args:
+            mode (str, optional): The mode in which to render the state. Defaults to "human".
+
+        Returns:
+            list: The current state of the environment.
+        """
         return self.state
 
     def _seed(self, seed=None):
+        """
+        Initializes the random seed for the environment.
+
+        Args:
+            seed (int, optional): The seed for the random number generator.
+
+        Returns:
+            list: The list of seeds used.
+        """
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
+
+    def _save_results(self):
+        """
+        Saves the results of the trading session, including plotting the asset value
+        and saving it to a file, and storing the daily return data as a CSV.
+        """
+        plt.plot(self.asset_memory, "r")
+        plt.savefig("results/account_value_train.png")
+        plt.close()
+
+        df_total_value = pd.DataFrame(self.asset_memory, columns=["account_value"])
+        df_total_value["daily_return"] = df_total_value["account_value"].pct_change(1)
+        df_total_value.to_csv("results/account_value_train.csv")
+
+    def _calculate_total_asset(self):
+        """
+        Calculates the total asset value, which is the sum of the available cash
+        and the value of the owned stocks.
+
+        Returns:
+            float: The total asset value.
+        """
+        return self.state[0] + sum(
+            np.array(self.state[1 : STOCK_DIM + 1])
+            * np.array(self.state[STOCK_DIM + 1 : STOCK_DIM * 2 + 1])
+        )
+
+    def _update_state(self):
+        """
+        Updates the environment's state with the latest stock data and financial indicators.
+
+        Returns:
+            list: The updated state of the environment.
+        """
+        return (
+            [self.state[0]]
+            + self.data.adjcp.values.tolist()
+            + list(self.state[STOCK_DIM + 1 : STOCK_DIM * 2 + 1])
+            + self.data.macd.values.tolist()
+            + self.data.rsi.values.tolist()
+            + self.data.cci.values.tolist()
+            + self.data.adx.values.tolist()
+        )

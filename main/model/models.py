@@ -29,6 +29,17 @@ from preprocessing.preprocessors import data_split
 
 # Training functions
 def train_A2C(env_train, model_name, timesteps=25000):
+    """
+    Trains an A2C model on the given environment.
+
+    Args:
+        env_train (gym.Env): The environment to train the model on.
+        model_name (str): The name to save the trained model.
+        timesteps (int, optional): The number of timesteps to train for. Default is 25000.
+
+    Returns:
+        stable_baselines3.A2C: The trained A2C model.
+    """
     start = time.time()
     model = A2C("MlpPolicy", env_train, verbose=0)
     model.learn(total_timesteps=timesteps)
@@ -38,6 +49,17 @@ def train_A2C(env_train, model_name, timesteps=25000):
 
 
 def train_PPO(env_train, model_name, timesteps=50000):
+    """
+    Trains a PPO model on the given environment.
+
+    Args:
+        env_train (gym.Env): The environment to train the model on.
+        model_name (str): The name to save the trained model.
+        timesteps (int, optional): The number of timesteps to train for. Default is 50000.
+
+    Returns:
+        stable_baselines3.PPO: The trained PPO model.
+    """
     start = time.time()
     model = PPO("MlpPolicy", env_train, verbose=0, ent_coef=0.005)
     model.learn(total_timesteps=timesteps)
@@ -47,6 +69,17 @@ def train_PPO(env_train, model_name, timesteps=50000):
 
 
 def train_DDPG(env_train, model_name, timesteps=10000):
+    """
+    Trains a DDPG model on the given environment.
+
+    Args:
+        env_train (gym.Env): The environment to train the model on.
+        model_name (str): The name to save the trained model.
+        timesteps (int, optional): The number of timesteps to train for. Default is 10000.
+
+    Returns:
+        stable_baselines3.DDPG: The trained DDPG model.
+    """
     n_actions = env_train.action_space.shape[-1]
     action_noise = OrnsteinUhlenbeckActionNoise(
         mean=np.zeros(n_actions), sigma=0.5 * np.ones(n_actions)
@@ -71,6 +104,23 @@ def DRL_prediction(
     turbulence_threshold,
     initial,
 ):
+    """
+    Runs the trained model on the environment for a prediction and stores the last state.
+
+    Args:
+        df (pd.DataFrame): The dataset used for training and validation.
+        model (stable_baselines3): The trained model to use for prediction.
+        name (str): The name used for saving the last state.
+        last_state (list): The state from the previous prediction.
+        iter_num (int): The current iteration number.
+        unique_trade_date (list): A list of unique trade dates.
+        rebalance_window (int): The window for rebalancing.
+        turbulence_threshold (float): The threshold for turbulence.
+        initial (bool): Whether this is the first iteration.
+
+    Returns:
+        list: The last state of the environment after the prediction.
+    """
     trade_data = data_split(
         df=df,
         start=unique_trade_date[iter_num - rebalance_window],
@@ -90,14 +140,11 @@ def DRL_prediction(
     )
 
     obs_trade = env_trade.reset()
-    # print(obs_trade)
     last_state = None  # Initialize
-    # print(f"Length of trade_data index: {len(trade_data.index.unique())}")
     for i in range(len(trade_data.index.unique())):
         action, _ = model.predict(obs_trade)
         _, _, _, _ = env_trade.step(action)
         if i == (len(trade_data.index.unique()) - 2):
-            # print(env_test.render())
             last_state = env_trade.envs[0].render()
 
     if last_state is None:
@@ -110,12 +157,32 @@ def DRL_prediction(
 
 
 def DRL_validation(model, test_data, test_env, test_obs):
+    """
+    Runs the trained model for validation.
+
+    Args:
+        model (stable_baselines3): The trained model to use for validation.
+        test_data (pd.DataFrame): The data used for testing.
+        test_env (gym.Env): The environment for testing.
+        test_obs (np.array): The observation for the test environment.
+
+    This function applies the trained model to the test data and environment.
+    """
     for _ in range(len(test_data.index.unique())):
         action, _ = model.predict(test_obs)
         test_obs, _, _, _ = test_env.step(action)
 
 
 def get_validation_sharpe(iteration):
+    """
+    Calculates the Sharpe ratio based on validation results.
+
+    Args:
+        iteration (int): The current iteration for validation.
+
+    Returns:
+        float: The calculated Sharpe ratio.
+    """
     df_total_value = pd.read_csv(
         f"results/account_value_validation_{iteration}.csv", index_col=0
     )
@@ -133,14 +200,21 @@ def get_validation_sharpe(iteration):
 def run_ensemble_strategy(
     df: pd.DataFrame, unique_trade_date, rebalance_window, validation_window
 ):
+    """
+    Runs the ensemble strategy by training multiple models (A2C, PPO, DDPG) and selecting the best performing model.
+
+    Args:
+        df (pd.DataFrame): The dataset used for training and validation.
+        unique_trade_date (list): A list of unique trade dates.
+        rebalance_window (int): The window for rebalancing.
+        validation_window (int): The window for validation.
+
+    This function trains multiple models, validates them, and selects the best performing model based on Sharpe ratio.
+    It then uses the selected model for trading predictions and stores the results.
+    """
     print("============Start Ensemble Strategy============")
     last_state_ensemble = []
-    (ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use) = (
-        [],
-        [],
-        [],
-        [],
-    )
+    ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use = [], [], [], []
 
     insample_turbulence = df[
         (df["datadate"] < 20151000) & (df["datadate"] >= 20090000)
