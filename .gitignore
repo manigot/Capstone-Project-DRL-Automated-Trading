@@ -1,6 +1,7 @@
 # Custom config
 results/
 trained_models/
+test.ipynb
 
 # remove DS_Store
 **/.DS_Store
