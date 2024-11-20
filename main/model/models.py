@@ -1,4 +1,6 @@
 # Common libraries
+import os
+import sys
 import time
 
 # import gym
@@ -8,17 +10,19 @@ from config import config
 
 # RL models from stable-baselines3
 from stable_baselines3 import A2C, DDPG, PPO  # , SAC, TD3
-from stable_baselines3.common.noise import (  # NormalActionNoise,
+from stable_baselines3.common.noise import (
     OrnsteinUhlenbeckActionNoise,
-)
+)  # NormalActionNoise,
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from main.env.EnvMultipleStock_trade import StockEnvTrade
-from main.env.EnvMultipleStock_train import StockEnvTrain
-from main.env.EnvMultipleStock_validation import StockEnvValidation
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from env.EnvMultipleStock_trade import StockEnvTrade
+from env.EnvMultipleStock_train import StockEnvTrain
+from env.EnvMultipleStock_validation import StockEnvValidation
 
 # Customized environment imports
-from main.preprocessing.preprocessors import data_split
+from preprocessing.preprocessors import data_split
 
 # from stable_baselines3.common.policies import MlpPolicy
 
