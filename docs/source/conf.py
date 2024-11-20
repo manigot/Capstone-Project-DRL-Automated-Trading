@@ -34,4 +34,4 @@ exclude_patterns = []
 
 # Set a more modern theme
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
+# html_static_path = ['_static']
