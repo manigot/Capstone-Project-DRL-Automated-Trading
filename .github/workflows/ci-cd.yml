@@ -87,7 +87,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './build/html'  # This should point to the folder where your HTML documentation is built
+          path: './docs/build/html'  # This should point to the folder where your HTML documentation is built
 
       - name: Deploy to GitHub Pages
         id: deployment
