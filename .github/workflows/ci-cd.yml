@@ -24,7 +24,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements_for_devs/requirements-check-code-format.txt
-        #   pip install -r requirements.txt
+          # pip install -r requirements.txt
 
       - name: Run isort
         run: isort . --check --diff
@@ -57,31 +57,38 @@ jobs:
         run: pytest
     continue-on-error: ${{ github.ref != 'refs/heads/main' }} # Ignore errors on non-main branches
 
-  # deploy:
-  #   name: Deploy Documentation
-  #   runs-on: ubuntu-latest
-  #   # needs: test
-  #   # if: github.ref == 'refs/heads/main' # Only run deployment on main branch
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+  deploy:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    # needs: test
+    # if: github.ref == 'refs/heads/main' # Only run deployment on main branch
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-  #     - name: Set Up Python
-  #       uses: actions/setup-python@v3
-  #       with:
-  #         python-version: '3.12'
+      - name: Set Up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
 
-  #     - name: Install Documentation Generator
-  #       run: |
-  #         pip install sphinx # Or mkdocs, pdoc, etc., based on your documentation tool
-  #         pip install -r requirements.txt
+      - name: Install Documentation Generator
+        run: |
+          pip install -r requirements_for_devs/requirements-documentation.txt
+          # pip install -r requirements.txt
 
-  #     - name: Build Documentation
-  #       run: |
-  #         sphinx-build docs/ docs/_build/html
+      - name: Build Documentation
+        run: |
+          cd docs
+          make html
 
-  #     - name: Deploy to GitHub Pages
-  #       uses: peaceiris/actions-gh-pages@v3
-  #       with:
-  #         github_token: ${{ secrets.GITHUB_TOKEN }}
-  #         publish_dir: docs/_build/html
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './build/html'  # This should point to the folder where your HTML documentation is built
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

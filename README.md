@@ -80,6 +80,7 @@ The script has been tested running under **Python >= 3.6.0**, with the folowing 
 pip install -r requirements.txt
 pip install -r requirements_for_devs/requirements-check-code-format.txt
 pip install -r requirements_for_devs/requirements-check-code-format.txt
+pip install -r requirements_for_devs/requirements-documentation.txt
 ```
 
 ### Questions
