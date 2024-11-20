@@ -4,15 +4,15 @@ import time
 # import gym
 import numpy as np
 import pandas as pd
+from config import config
 
 # RL models from stable-baselines3
 from stable_baselines3 import A2C, DDPG, PPO  # , SAC, TD3
-from stable_baselines3.common.noise import (
+from stable_baselines3.common.noise import (  # NormalActionNoise,
     OrnsteinUhlenbeckActionNoise,
-)  # NormalActionNoise,
+)
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-from config import config
 from main.env.EnvMultipleStock_trade import StockEnvTrade
 from main.env.EnvMultipleStock_train import StockEnvTrain
 from main.env.EnvMultipleStock_validation import StockEnvValidation

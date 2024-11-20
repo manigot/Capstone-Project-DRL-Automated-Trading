@@ -4,6 +4,13 @@ import time
 import gym
 import numpy as np
 import pandas as pd
+from config import config
+from env.EnvMultipleStock_trade import StockEnvTrade
+
+# customized env
+from env.EnvMultipleStock_train import StockEnvTrain
+from env.EnvMultipleStock_validation import StockEnvValidation
+from preprocessing.preprocessors import *
 
 # RL models from stable-baselines
 from stable_baselines import A2C, ACER, DDPG, GAIL, PPO2, SAC, TD3
@@ -15,14 +22,6 @@ from stable_baselines.common.noise import (
 from stable_baselines.common.policies import MlpLnLstmPolicy, MlpLstmPolicy, MlpPolicy
 from stable_baselines.common.vec_env import DummyVecEnv
 from stable_baselines.ddpg.policies import DDPGPolicy
-
-from config import config
-from env.EnvMultipleStock_trade import StockEnvTrade
-
-# customized env
-from env.EnvMultipleStock_train import StockEnvTrain
-from env.EnvMultipleStock_validation import StockEnvValidation
-from preprocessing.preprocessors import *
 
 
 def train_A2C(env_train, model_name, timesteps=25000):
