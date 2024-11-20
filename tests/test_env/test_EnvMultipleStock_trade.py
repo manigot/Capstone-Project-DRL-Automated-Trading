@@ -8,13 +8,14 @@ import pytest
 # Add the parent directory to the Python path to find 'env' module
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from env.EnvMultipleStock_trade import StockEnvTrade
+from main.env.EnvMultipleStock_trade import StockEnvTrade
 
 # Fixed seed for reproducibility
 SEED = 42
 
 
 # Sample dataframe for testing
+
 
 # Sample dataframe for testing
 @pytest.fixture
@@ -26,7 +27,7 @@ def mock_data():
     for i in range(num_days):
         for _ in range(stock_dim):
             dates.append(i)
-    tics = [f'stock_{i}' for i in range(stock_dim)]
+    tics = [f"stock_{i}" for i in range(stock_dim)]
     turbulence = []
     for i in range(num_days):
         turb = np.random.rand()
@@ -44,7 +45,7 @@ def mock_data():
         "rsi": np.random.rand(num_days * stock_dim),
         "cci": np.random.rand(num_days * stock_dim),
         "adx": np.random.rand(num_days * stock_dim),
-        "turbulence":turbulence,
+        "turbulence": turbulence,
     }
     df = pd.DataFrame(data)
     df.index = df["datadate"].factorize()[0]

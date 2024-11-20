@@ -107,7 +107,7 @@ Please read the [documentation](https://stable-baselines.readthedocs.io/) for mo
 
 ## Run DRL Ensemble Strategy
 ```shell
-python run_DRL.py
+python3 main/run_DRL.py
 ```
 ## Backtesting
 

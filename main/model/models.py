@@ -4,18 +4,21 @@ import time
 # import gym
 import numpy as np
 import pandas as pd
+
 # RL models from stable-baselines3
 from stable_baselines3 import A2C, DDPG, PPO  # , SAC, TD3
-from stable_baselines3.common.noise import \
-    OrnsteinUhlenbeckActionNoise  # NormalActionNoise,
+from stable_baselines3.common.noise import (
+    OrnsteinUhlenbeckActionNoise,
+)  # NormalActionNoise,
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from config import config
-from env.EnvMultipleStock_trade import StockEnvTrade
-from env.EnvMultipleStock_train import StockEnvTrain
-from env.EnvMultipleStock_validation import StockEnvValidation
+from main.env.EnvMultipleStock_trade import StockEnvTrade
+from main.env.EnvMultipleStock_train import StockEnvTrain
+from main.env.EnvMultipleStock_validation import StockEnvValidation
+
 # Customized environment imports
-from preprocessing.preprocessors import data_split
+from main.preprocessing.preprocessors import data_split
 
 # from stable_baselines3.common.policies import MlpPolicy
 
@@ -92,7 +95,6 @@ def DRL_prediction(
         if i == (len(trade_data.index.unique()) - 2):
             # print(env_test.render())
             last_state = env_trade.envs[0].render()
-
 
     if last_state is None:
         print("Warning: last_state is still None!")

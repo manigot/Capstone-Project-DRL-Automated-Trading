@@ -1,6 +1,7 @@
 # common library
 import os
-
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import pandas as pd
 
 # preprocessor
@@ -21,7 +22,7 @@ def run_model() -> None:
     """Train the model."""
 
     # read and preprocess data
-    preprocessed_path = "done_data.csv"
+    preprocessed_path = "main/done_data.csv"
     if os.path.exists(preprocessed_path):
         data = pd.read_csv(preprocessed_path, index_col=0)
     else:
