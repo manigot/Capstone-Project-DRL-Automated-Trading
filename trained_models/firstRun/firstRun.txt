@@ -365,4 +365,4 @@ total_cost:  707.3734225074006
 total trades:  93
 Sharpe:  0.2836714121593213
 Ensemble Strategy took:  150.1863147139549  minutes
-(cs238) kyledsouza@C02D35L6MD6R CS238FinalProject % 
+(cs238) kyledsouza@C02D35L6MD6R CS238FinalProject %

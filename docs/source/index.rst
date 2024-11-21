@@ -16,5 +16,3 @@ Capstone Project - DRL for automated trading documentation
    :caption: Contents:
 
    modules
-
-
