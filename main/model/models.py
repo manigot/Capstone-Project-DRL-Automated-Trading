@@ -10,9 +10,9 @@ from config import config
 
 # RL models from stable-baselines3
 from stable_baselines3 import A2C, DDPG, PPO  # , SAC, TD3
-from stable_baselines3.common.noise import (
+from stable_baselines3.common.noise import (  # NormalActionNoise,
     OrnsteinUhlenbeckActionNoise,
-)  # NormalActionNoise,
+)
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))

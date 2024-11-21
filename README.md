@@ -41,7 +41,7 @@ brew install cmake openmpi
 #### Windows 10
 
 To install stable-baselines on Windows, please look at the [documentation](https://stable-baselines.readthedocs.io/en/master/guide/install.html#prerequisites).
-    
+
 ### Create and Activate Virtual Environment (Optional but highly recommended)
 cd into this repository
 ```bash
@@ -51,7 +51,7 @@ Under folder /Deep-Reinforcement-Learning-for-Automated-Stock-Trading-Ensemble-S
 ```bash
 pip install virtualenv
 ```
-Virtualenvs are essentially folders that have copies of python executable and all python packages. 
+Virtualenvs are essentially folders that have copies of python executable and all python packages.
 
 **Virtualenvs can also avoid packages conflicts.**
 
@@ -143,3 +143,18 @@ Our purpose is to create a highly robust trading strategy. So we use an ensemble
 
 ## Performance
 <img src=figs/performance.png>
+
+## Contributions
+
+### Using pre-commit Hooks
+We use [pre-commit](https://pre-commit.com/) to ensure code quality and consistency. The pre-commit hooks are automatically triggered before each commit to perform checks like code formatting and linting. This helps maintain a clean and standardized codebase.
+
+#### Setting up pre-commit:
+1. Install pre-commit:
+```bash
+pre-commit install
+```
+2. To manually run all hooks on your files:
+```bash
+pre-commit run --all-files
+```
