@@ -148,7 +148,7 @@ def preprocess_data() -> pd.DataFrame:
     :return: pandas DataFrame with preprocessed data.
     """
     # Load the dataset
-    df = load_dataset(file_name=config.TRAINING_DATA_FILE)
+    df = load_dataset(file_name=config.TRAINING_DATA_TEST_FILE)
 
     # Filter data after 2009
     df = df[df["datadate"] >= 20090000]
