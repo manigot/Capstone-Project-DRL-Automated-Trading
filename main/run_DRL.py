@@ -5,7 +5,8 @@ import sys
 import pandas as pd
 from model.models import run_ensemble_strategy
 from preprocessing.preprocessors import add_turbulence, preprocess_data
-
+from config.config import tickers_list
+from api.get_data import gather_data
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
@@ -31,6 +32,7 @@ def run_model() -> None:
     if os.path.exists(preprocessed_path):
         data = pd.read_csv(preprocessed_path, index_col=0)
     else:
+        gather_data(tickers=tickers_list, start_date="2009-01-01", end_date="2020-07-07")
         data = preprocess_data()
         data = add_turbulence(data)
         data.to_csv(preprocessed_path)

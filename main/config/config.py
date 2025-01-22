@@ -26,4 +26,10 @@ TRAINED_MODEL_DIR = f"trained_models/{now}"
 os.makedirs(TRAINED_MODEL_DIR)
 TURBULENCE_DATA = "data/dow30_turbulence_index.csv"
 
+tickers_list = ['AAPL', 'AXP', 'BA', 'CAT', 'CSCO', 'CVX', 'DD', 'DIS', 'GS', 'HD',
+       'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'MCD', 'MMM', 'MRK', 'MSFT',
+       'NKE', 'PFE', 'PG', 'RTX', 'TRV', 'UNH', 'V', 'VZ', 'WBA', 'WMT',
+       'XOM']
+
 TESTING_DATA_FILE = "test.csv"
+TRAINING_DATA_TEST_FILE = "data/data_test.csv"
