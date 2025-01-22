@@ -32,7 +32,7 @@ def run_model() -> None:
     if os.path.exists(preprocessed_path):
         data = pd.read_csv(preprocessed_path, index_col=0)
     else:
-        gather_data(tickers_list, "2009-01-01", "2020-07-07")
+        gather_data(tickers=tickers_list, start_date="2009-01-01", end_date="2020-07-07")
         data = preprocess_data()
         data = add_turbulence(data)
         data.to_csv(preprocessed_path)
