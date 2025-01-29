@@ -55,46 +55,46 @@ def data_split(df: pd.DataFrame, start: str, end: str) -> pd.DataFrame:
     return data
 
 
-def calculate_price(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate adjusted close price, open-high-low price, and volume.
+# def calculate_price(df: pd.DataFrame) -> pd.DataFrame:
+#     """
+#     Calculate adjusted close price, open-high-low price, and volume.
 
-    :param df: pandas DataFrame containing columns for stock data.
-    :return: pandas DataFrame with calculated prices and volume.
-    """
-    # Create a copy of the original dataframe
-    # to avoid modifying the original data
-    data = df.copy()
+#     :param df: pandas DataFrame containing columns for stock data.
+#     :return: pandas DataFrame with calculated prices and volume.
+#     """
+#     # Create a copy of the original dataframe
+#     # to avoid modifying the original data
+#     data = df.copy()
 
-    # Select relevant columns
-    data = data[
-        [
-            "datadate",
-            "tic",
-            "prccd",
-            "ajexdi",
-            "prcod",
-            "prchd",
-            "prcld",
-            "cshtrd",
-        ]
-    ]
+#     # Select relevant columns
+#     data = data[
+#         [
+#             "datadate",
+#             "tic",
+#             "prccd",
+#             "ajexdi",
+#             "prcod",
+#             "prchd",
+#             "prcld",
+#             "cshtrd",
+#         ]
+#     ]
 
-    # Ensure that ajexdi is not zero (to avoid division by zero)
-    data["ajexdi"] = data["ajexdi"].apply(lambda x: 1 if x == 0 else x)
+#     # Ensure that ajexdi is not zero (to avoid division by zero)
+#     data["ajexdi"] = data["ajexdi"].apply(lambda x: 1 if x == 0 else x)
 
-    # Calculate adjusted close price and price-related columns
-    data["adjcp"] = data["prccd"] / data["ajexdi"]
-    data["open"] = data["prcod"] / data["ajexdi"]
-    data["high"] = data["prchd"] / data["ajexdi"]
-    data["low"] = data["prcld"] / data["ajexdi"]
-    data["volume"] = data["cshtrd"]
+#     # Calculate adjusted close price and price-related columns
+#     data["adjcp"] = data["prccd"] / data["ajexdi"]
+#     data["open"] = data["prcod"] / data["ajexdi"]
+#     data["high"] = data["prchd"] / data["ajexdi"]
+#     data["low"] = data["prcld"] / data["ajexdi"]
+#     data["volume"] = data["cshtrd"]
 
-    # Reorder columns and sort by ticker and date
-    data = data[["datadate", "tic", "adjcp", "open", "high", "low", "volume"]]
-    data = data.sort_values(["tic", "datadate"], ignore_index=True)
+#     # Reorder columns and sort by ticker and date
+#     data = data[["datadate", "tic", "adjcp", "open", "high", "low", "volume"]]
+#     data = data.sort_values(["tic", "datadate"], ignore_index=True)
 
-    return data
+#     return data
 
 
 def add_technical_indicator(df: pd.DataFrame) -> pd.DataFrame:
@@ -154,10 +154,10 @@ def preprocess_data() -> pd.DataFrame:
     df = df[df["datadate"] >= 20090000]
 
     # Calculate adjusted price
-    df_preprocess = calculate_price(df)
+    # df_preprocess = calculate_price(df)
 
     # Add technical indicators
-    df_final = add_technical_indicator(df_preprocess)
+    df_final = add_technical_indicator(df)
 
     # Fill missing values at the beginning
     df_final.fillna(method="bfill", inplace=True)
@@ -181,6 +181,7 @@ def add_turbulence(df: pd.DataFrame) -> pd.DataFrame:
         # In case of error, add an empty turbulence column
         df["turbulence"] = None
 
+    df = df.reset_index(drop=True)
     return df
 
 

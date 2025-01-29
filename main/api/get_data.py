@@ -16,16 +16,16 @@ def get_data_from_api(ticker: str, start_date: str, end_date: str) -> pd.DataFra
     data.reset_index(inplace=True)
     data['tic'] = ticker
     data.rename(columns={
-        'Adj Close': 'ajexdi',
+        'Adj Close': 'adjcp',
         'Close': 'prccd',
-        'Open': 'prcod',
-        'High': 'prchd',
-        'Low': 'prcld',
-        'Volume': 'cshtrd'
+        'Open': 'open',
+        'High': 'high',
+        'Low': 'low',
+        'Volume': 'volume'
     }, inplace=True)
-    data = data[['Date', 'tic', 'prccd', 'ajexdi', 'prcod', 'prchd', 'prcld', 'cshtrd']]
+    data = data[['Date', "tic", "adjcp", "open", "high", "low", "volume"]]
     data['datadate'] = data['Date'].dt.strftime('%Y%m%d')
-    data = data[['datadate', 'tic', 'prccd', 'ajexdi', 'prcod', 'prchd', 'prcld', 'cshtrd']]
+    data = data[['datadate', "tic", "adjcp", "open", "high", "low", "volume"]]
     data.columns = data.columns.get_level_values(0)
     data.columns = [col.replace('Price', '').replace('Ticker', '').strip() for col in data.columns]
     # data.to_csv(f'{TRAINING_DATA_FILE}', index=True)
@@ -47,8 +47,8 @@ def gather_data(tickers: list, start_date: str, end_date: str) -> pd.DataFrame:
         (get_data_from_api(ticker, start_date, end_date) for ticker in tickers),
         ignore_index=True
     )
-    
+    combined_data = combined_data.sort_values(["tic", "datadate"], ignore_index=True)
     # Save to CSV
-    combined_data.to_csv(test_file, index=True)
+    combined_data.to_csv(test_file, index=False)
     print("Data saved to", test_file)
     return combined_data
