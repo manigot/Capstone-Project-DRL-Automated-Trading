@@ -7,12 +7,14 @@ import pandas as pd
 from gym import spaces
 from gym.utils import seeding
 
+from run_DRL import tickers_list
+
 # Shares normalization factor (100 shares per trade)
 HMAX_NORMALIZE = 100
 # Initial amount of money in our account
 INITIAL_ACCOUNT_BALANCE = 1000000
 # Total number of stocks in our portfolio
-STOCK_DIM = 30
+STOCK_DIM = len(tickers_list)
 # Transaction fee percentage (0.1%)
 TRANSACTION_FEE_PERCENT = 0.001
 # Scaling factor for reward

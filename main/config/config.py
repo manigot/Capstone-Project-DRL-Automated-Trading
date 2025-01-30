@@ -1,6 +1,7 @@
 import datetime
 import os
-
+import sys
+import run_DRL
 # import pathlib
 
 # import pandas as pd
@@ -19,6 +20,10 @@ import os
 
 # data
 # TRAINING_DATA_FILE = "data/ETF_SPY_2009_2020.csv"
+
+
+
+
 TRAINING_DATA_FILE = "data/dow_30_2009_2020.csv"
 
 now = datetime.datetime.now()
@@ -26,10 +31,6 @@ TRAINED_MODEL_DIR = f"trained_models/{now}"
 os.makedirs(TRAINED_MODEL_DIR)
 TURBULENCE_DATA = "data/dow30_turbulence_index.csv"
 
-tickers_list = ['AAPL', 'AXP', 'BA', 'CAT', 'CSCO', 'CVX', 'DD', 'DIS', 'GS', 'HD',
-       'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'MCD', 'MMM', 'MRK', 'MSFT',
-       'NKE', 'PFE', 'PG', 'RTX', 'TRV', 'UNH', 'V', 'VZ', 'WBA', 'WMT',
-       'XOM']
-
+tickers_list = run_DRL.tickers_list
 TESTING_DATA_FILE = "test.csv"
 TRAINING_DATA_TEST_FILE = "data/data_test.csv"

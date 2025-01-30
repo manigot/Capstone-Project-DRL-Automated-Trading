@@ -10,10 +10,13 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
+from run_DRL import tickers_list
+
+
 # Constants for the environment
 HMAX_NORMALIZE = 100  # Shares normalization factor: 100 shares per trade
 INITIAL_ACCOUNT_BALANCE = 1000000  # Initial account balance
-STOCK_DIM = 30  # Number of stocks in the portfolio
+STOCK_DIM = len(tickers_list)  # Number of stocks in the portfolio
 TRANSACTION_FEE_PERCENT = 0.001  # Transaction fee percentage
 REWARD_SCALING = 1e-4  # Reward scaling factor
 

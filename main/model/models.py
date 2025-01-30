@@ -26,6 +26,8 @@ from preprocessing.preprocessors import data_split
 
 # from stable_baselines3.common.policies import MlpPolicy
 
+import run_DRL
+
 
 # Training functions
 def train_A2C(env_train, model_name, timesteps=25000):
@@ -217,7 +219,7 @@ def run_ensemble_strategy(
     ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use = [], [], [], []
 
     insample_turbulence = df[
-        (df["datadate"] < 20151000) & (df["datadate"] >= 20090000)
+        (df["datadate"] < run_DRL.format_date(run_DRL.validation_date)) & (df["datadate"] >= run_DRL.format_date(run_DRL.start_date))
     ].drop_duplicates(subset=["datadate"])
     insample_turbulence_threshold = np.quantile(
         insample_turbulence["turbulence"].values, 0.90
@@ -251,7 +253,7 @@ def run_ensemble_strategy(
         # Training environments
         train = data_split(
             df,
-            start=20090000,
+            start=run_DRL.format_date(run_DRL.start_date),
             end=unique_trade_date[i - rebalance_window - validation_window],
         )
         env_train = DummyVecEnv([lambda: StockEnvTrain(train)])
