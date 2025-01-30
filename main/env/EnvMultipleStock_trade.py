@@ -8,6 +8,7 @@ from gym import spaces
 from gym.utils import seeding
 
 from config.config import tickers_list
+from config.config import Csv_files_dir
 
 # Shares normalization factor (100 shares per trade)
 HMAX_NORMALIZE = 100
@@ -160,12 +161,12 @@ class StockEnvTrade(gym.Env):
             # Plot the asset memory
             plt.plot(self.asset_memory, 'r')
             plt.title("Account Value Over Time")
-            plt.savefig("results/account_value_trade_{}_{}.png".format(self.model_name, self.iteration))
+            plt.savefig(Csv_files_dir+"account_value_trade_{}_{}.png".format(self.model_name, self.iteration))
             plt.close()
 
             # Save account values to CSV
             df_total_value = pd.DataFrame(self.asset_memory, columns=['account_value'])
-            df_total_value.to_csv("results/account_value_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
+            df_total_value.to_csv(Csv_files_dir + "account_value_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
 
             # Compute daily returns and Sharpe ratio
             df_total_value['daily_return'] = df_total_value['account_value'].pct_change(1)
@@ -174,7 +175,7 @@ class StockEnvTrade(gym.Env):
 
             # Save rewards to CSV
             df_rewards = pd.DataFrame(self.rewards_memory, columns=['reward'])
-            df_rewards.to_csv("results/account_rewards_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
+            df_rewards.to_csv(Csv_files_dir+"account_rewards_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
 
             end_total_asset = self.state[0] + sum(
                 np.array(self.state[1: (STOCK_DIM + 1)]) *

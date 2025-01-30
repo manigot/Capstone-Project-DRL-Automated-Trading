@@ -11,6 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from config.config import tickers_list
+from config.config import Csv_files_dir
 
 # Constants for the environment
 HMAX_NORMALIZE = 100  # Shares normalization factor: 100 shares per trade
@@ -165,12 +166,12 @@ class StockEnvValidation(gym.Env):
         if self.terminal:
             plt.plot(self.asset_memory, "r")
             plt.savefig(
-                "results/account_value_validation_{}.png".format(self.iteration)
+                Csv_files_dir+"account_value_validation_{}.png".format(self.iteration)
             )
             plt.close()
             df_total_value = pd.DataFrame(self.asset_memory)
             df_total_value.to_csv(
-                "results/account_value_validation_{}.csv".format(self.iteration)
+                Csv_files_dir+"account_value_validation_{}.csv".format(self.iteration)
             )
             end_total_asset = self.state[0] + sum(
                 np.array(self.state[1 : (STOCK_DIM + 1)])

@@ -27,7 +27,10 @@ TRAINING_DATA_FILE = "data/dow_30_2009_2020.csv"
 
 now = datetime.datetime.now().strftime('%Y-%m-%d %H;%M;%S')
 TRAINED_MODEL_DIR = f"trained_models/{now}"
+Csv_files_dir = f"results/{now}/"
 os.makedirs(TRAINED_MODEL_DIR)
+os.makedirs(Csv_files_dir)
+
 TURBULENCE_DATA = "data/dow30_turbulence_index.csv"
 
 TESTING_DATA_FILE = "test.csv"

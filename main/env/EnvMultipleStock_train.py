@@ -9,6 +9,7 @@ from gym.utils import seeding
 matplotlib.use("Agg")
 
 from config.config import tickers_list
+from config.config import Csv_files_dir
 
 # Constants
 HMAX_NORMALIZE = 100  # Normalization factor for shares
@@ -210,12 +211,12 @@ class StockEnvTrain(gym.Env):
         and saving it to a file, and storing the daily return data as a CSV.
         """
         plt.plot(self.asset_memory, "r")
-        plt.savefig("results/account_value_train.png")
+        plt.savefig(Csv_files_dir+"account_value_train.png")
         plt.close()
 
         df_total_value = pd.DataFrame(self.asset_memory, columns=["account_value"])
         df_total_value["daily_return"] = df_total_value["account_value"].pct_change(1)
-        df_total_value.to_csv("results/account_value_train.csv")
+        df_total_value.to_csv(Csv_files_dir+"account_value_train.csv")
 
     def _calculate_total_asset(self):
         """
