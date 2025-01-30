@@ -8,8 +8,7 @@ from gym.utils import seeding
 
 matplotlib.use("Agg")
 
-from run_DRL import tickers_list
-
+from config.config import tickers_list
 
 # Constants
 HMAX_NORMALIZE = 100  # Normalization factor for shares
@@ -55,7 +54,7 @@ class StockEnvTrain(gym.Env):
 
         # Define action and observation spaces
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(181,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+ STOCK_DIM*6,))
 
         # Initialize environment state
         self.data = self.df.loc[self.day, :]

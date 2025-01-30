@@ -7,7 +7,7 @@ import pandas as pd
 from gym import spaces
 from gym.utils import seeding
 
-from run_DRL import tickers_list
+from config.config import tickers_list
 
 # Shares normalization factor (100 shares per trade)
 HMAX_NORMALIZE = 100
@@ -64,7 +64,7 @@ class StockEnvTrade(gym.Env):
         self.previous_state = previous_state or []
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
         # Shape: 1 (balance) + 30 (prices) + 30 (shares) + 30 (MACD) + 30 (RSI) + 30 (CCI) + 30 (ADX) = 181
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(181,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+STOCK_DIM*6,))
 
         # Load the initial slice of data
         self.data = self.df.loc[self.day, :]

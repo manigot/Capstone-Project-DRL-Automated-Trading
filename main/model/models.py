@@ -26,7 +26,6 @@ from preprocessing.preprocessors import data_split
 
 # from stable_baselines3.common.policies import MlpPolicy
 
-import run_DRL
 
 
 # Training functions
@@ -219,7 +218,7 @@ def run_ensemble_strategy(
     ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use = [], [], [], []
 
     insample_turbulence = df[
-        (df["datadate"] < run_DRL.format_date(run_DRL.validation_date)) & (df["datadate"] >= run_DRL.format_date(run_DRL.start_date))
+        (df["datadate"] < config.format_date(config.validation_date)) & (df["datadate"] >= config.format_date(config.start_date))
     ].drop_duplicates(subset=["datadate"])
     insample_turbulence_threshold = np.quantile(
         insample_turbulence["turbulence"].values, 0.90
@@ -238,7 +237,7 @@ def run_ensemble_strategy(
             df["datadate"]
             == unique_trade_date[i - rebalance_window - validation_window]
         ].tolist()[-1]
-        start_date_index = end_date_index - validation_window * 30 + 1
+        start_date_index = end_date_index - validation_window * len(config.tickers_list) + 1
         historical_turbulence = df.iloc[
             start_date_index : (end_date_index + 1), :
         ].drop_duplicates(subset=["datadate"])
@@ -253,7 +252,7 @@ def run_ensemble_strategy(
         # Training environments
         train = data_split(
             df,
-            start=run_DRL.format_date(run_DRL.start_date),
+            start=config.format_date(config.start_date),
             end=unique_trade_date[i - rebalance_window - validation_window],
         )
         env_train = DummyVecEnv([lambda: StockEnvTrain(train)])

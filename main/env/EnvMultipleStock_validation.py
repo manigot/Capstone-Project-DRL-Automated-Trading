@@ -10,8 +10,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 
-from run_DRL import tickers_list
-
+from config.config import tickers_list
 
 # Constants for the environment
 HMAX_NORMALIZE = 100  # Shares normalization factor: 100 shares per trade
@@ -59,7 +58,7 @@ class StockEnvValidation(gym.Env):
         self.day = day
         self.df = df
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(181,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+ STOCK_DIM*6,))
         self.data = self.df.loc[self.day, :]
         self.terminal = False
         self.turbulence_threshold = turbulence_threshold
