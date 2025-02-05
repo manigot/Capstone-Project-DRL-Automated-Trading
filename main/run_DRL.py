@@ -62,7 +62,5 @@ def run_model(preprocessed_data = "done_data.csv") -> None:
 
     # _logger.info(f"saving model version: {_version}")
 
-"""
 if __name__ == "__main__":
     run_model()
-"""
