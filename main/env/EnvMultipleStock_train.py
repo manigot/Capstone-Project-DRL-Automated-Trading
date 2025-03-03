@@ -13,7 +13,7 @@ from config.config import Csv_files_dir
 
 # Constants
 HMAX_NORMALIZE = 100  # Normalization factor for shares
-INITIAL_ACCOUNT_BALANCE = 1_000_000  # Initial account balance
+INITIAL_ACCOUNT_BALANCE = 1000000  # Initial account balance
 STOCK_DIM = len(tickers_list)  # Number of stocks in the portfolio
 TRANSACTION_FEE_PERCENT = 0.001  # Transaction fee percentage
 REWARD_SCALING = 1e-4  # Scaling factor for rewards

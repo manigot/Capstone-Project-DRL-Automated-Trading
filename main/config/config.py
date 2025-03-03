@@ -23,7 +23,7 @@ import sys
 
 
 
-TRAINING_DATA_FILE = "data/dow_30_2009_2020.csv"
+# TRAINING_DATA_FILE = "data/dow_30_2009_2020.csv"
 
 now = datetime.datetime.now().strftime('%Y-%m-%d %H;%M;%S')
 TRAINED_MODEL_DIR = f"trained_models/{now}"
@@ -44,8 +44,8 @@ tickers_list_old = ['AAPL', 'AXP', 'BA', 'CAT', 'CSCO', 'CVX', 'DD', 'DIS', 'GS'
 tickers_list = ['AAPL', 'AXP', 'BA', 'CAT']
 
 start_date = "2009-01-01"
-end_date = "2020-12-31"
-validation_date = "2015-01-01"
+end_date = "2024-12-31"
+validation_date = "2019-01-01"
 rebalance_window = 63
 validation_window = 63
 
