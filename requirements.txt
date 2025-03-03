@@ -22,4 +22,4 @@ wheel==0.44.0
 
 
 # api finance
-yfinance==0.2.50
+yfinance==0.2.54

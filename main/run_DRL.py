@@ -26,7 +26,7 @@ def run_model(preprocessed_data = "done_data") -> None:
     """Train the model."""
 
     # read and preprocess data
-    preprocessed_path = "main/" + preprocessed_data + start_date + "_" + end_date + ".csv"
+    preprocessed_path = "main/data/" + preprocessed_data + start_date + "_" + end_date + ".csv"
     if os.path.exists(preprocessed_path):
         data = pd.read_csv(preprocessed_path, index_col=0)
     else:
