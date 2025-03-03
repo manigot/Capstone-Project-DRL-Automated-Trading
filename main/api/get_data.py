@@ -16,8 +16,8 @@ def get_data_from_api(ticker: str, start_date: str, end_date: str) -> pd.DataFra
     data.reset_index(inplace=True)
     data['tic'] = ticker
     data.rename(columns={
-        'Adj Close': 'adjcp',
-        'Close': 'prccd',
+        # 'Adj Close': 'adjcp',
+        'Close': 'adjcp',
         'Open': 'open',
         'High': 'high',
         'Low': 'low',

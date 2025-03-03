@@ -22,11 +22,11 @@ from config.config import *
 # import time
 # from stable_baselines3.common.vec_env import DummyVecEnv
 
-def run_model(preprocessed_data = "done_data.csv") -> None:
+def run_model(preprocessed_data = "done_data") -> None:
     """Train the model."""
 
     # read and preprocess data
-    preprocessed_path = "main/" + preprocessed_data
+    preprocessed_path = "main/" + preprocessed_data + start_date + "_" + end_date + ".csv"
     if os.path.exists(preprocessed_path):
         data = pd.read_csv(preprocessed_path, index_col=0)
     else:
@@ -48,8 +48,8 @@ def run_model(preprocessed_data = "done_data.csv") -> None:
     ]["datadate"].unique()
     print(unique_trade_date)
 
-    # rebalance_window is the number of months to retrain the model
-    # validation_window is the number of months to validation the model
+    # rebalance_window is the number of day to retrain the model
+    # validation_window is the number of day to validation the model
     # and select for trading
 
     # Ensemble Strategy
