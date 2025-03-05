@@ -26,8 +26,6 @@ from preprocessing.preprocessors import data_split
 
 # from stable_baselines3.common.policies import MlpPolicy
 
-
-
 # Training functions
 def train_A2C(env_train, model_name, timesteps=25000):
     """
@@ -48,7 +46,6 @@ def train_A2C(env_train, model_name, timesteps=25000):
     print("Training time (A2C):", (time.time() - start) / 60, "minutes")
     return model
 
-
 def train_PPO(env_train, model_name, timesteps=50000):
     """
     Trains a PPO model on the given environment.
@@ -67,7 +64,6 @@ def train_PPO(env_train, model_name, timesteps=50000):
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
     print("Training time (PPO):", (time.time() - start) / 60, "minutes")
     return model
-
 
 def train_DDPG(env_train, model_name, timesteps=10000):
     """
@@ -91,7 +87,6 @@ def train_DDPG(env_train, model_name, timesteps=10000):
     model.save(f"{config.TRAINED_MODEL_DIR}/{model_name}")
     print("Training time (DDPG):", (time.time() - start) / 60, "minutes")
     return model
-
 
 # Prediction and validation functions
 def DRL_prediction(
@@ -154,9 +149,8 @@ def DRL_prediction(
     pd.DataFrame({"last_state": last_state}).to_csv(
         config.Csv_files_dir + f"last_state_{name}_{iter_num}.csv", index=False
     )
-    print(last_state)
+    # print(last_state)
     return last_state
-
 
 def DRL_validation(model, test_data, test_env, test_obs):
     """
@@ -173,7 +167,6 @@ def DRL_validation(model, test_data, test_env, test_obs):
     for _ in range(len(test_data.index.unique())):
         action, _ = model.predict(test_obs)
         test_obs, _, _, _ = test_env.step(action)
-
 
 def get_validation_sharpe(iteration):
     """
@@ -197,7 +190,6 @@ def get_validation_sharpe(iteration):
     )
     return sharpe
 
-
 # Main ensemble strategy
 def run_ensemble_strategy(
     df: pd.DataFrame, unique_trade_date, rebalance_window, validation_window
@@ -216,6 +208,9 @@ def run_ensemble_strategy(
     """
     print("============Start Ensemble Strategy============")
     last_state_ensemble = []
+    last_state_a2c = []
+    last_state_ppo = []
+    last_state_ddpg = []
     ppo_sharpe_list, ddpg_sharpe_list, a2c_sharpe_list, model_use = [], [], [], []
 
     insample_turbulence = df[
@@ -315,6 +310,39 @@ def run_ensemble_strategy(
             model_ensemble,
             "ensemble",
             last_state_ensemble,
+            i,
+            unique_trade_date,
+            rebalance_window,
+            turbulence_threshold,
+            initial,
+        )
+        last_state_a2c = DRL_prediction(
+            df,
+            model_a2c,
+            "a2c",
+            last_state_a2c,
+            i,
+            unique_trade_date,
+            rebalance_window,
+            turbulence_threshold,
+            initial,
+        )
+        last_state_ppo = DRL_prediction(
+            df,
+            model_ppo,
+            "ppo",
+            last_state_ppo,
+            i,
+            unique_trade_date,
+            rebalance_window,
+            turbulence_threshold,
+            initial,
+        )
+        last_state_ddpg = DRL_prediction(
+            df,
+            model_ddpg,
+            "ddpg",
+            last_state_ddpg,
             i,
             unique_trade_date,
             rebalance_window,
