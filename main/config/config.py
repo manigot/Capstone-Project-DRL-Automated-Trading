@@ -28,8 +28,7 @@ import sys
 now = datetime.datetime.now().strftime('%Y-%m-%d %H;%M;%S')
 TRAINED_MODEL_DIR = f"trained_models/{now}"
 Csv_files_dir = f"results/{now}/"
-os.makedirs(TRAINED_MODEL_DIR)
-os.makedirs(Csv_files_dir)
+
 
 TURBULENCE_DATA = "data/dow30_turbulence_index.csv"
 
@@ -37,15 +36,18 @@ TESTING_DATA_FILE = "test.csv"
 TRAINING_DATA_TEST_FILE = "data/data_test.csv"
 
 
-tickers_list_old = ['AAPL', 'AXP', 'BA', 'CAT', 'CSCO', 'CVX', 'DD', 'DIS', 'GS', 'HD',
+tickers_list = ['AAPL', 'AXP', 'BA', 'CAT', 'CSCO', 'CVX', 'DD', 'DIS', 'GS', 'HD',
        'IBM', 'INTC', 'JNJ', 'JPM', 'KO', 'MCD', 'MMM', 'MRK', 'MSFT',
        'NKE', 'PFE', 'PG', 'RTX', 'TRV', 'UNH', 'V', 'VZ', 'WBA', 'WMT',
        'XOM']
-tickers_list = ['AAPL', 'AXP', 'BA', 'CAT']
+# tickers_list = ['AAPL', 'AXP', 'BA', 'CAT']
 
-start_date = "2009-01-01"
+# start_date = "2005-01-01"
+# end_date = "2024-12-31"
+# validation_date = "2020-01-01"
+start_date = "2018-01-01"
 end_date = "2024-12-31"
-validation_date = "2019-01-01"
+validation_date = "2020-01-01"
 rebalance_window = 63
 validation_window = 63
 
@@ -54,5 +56,16 @@ def format_date(date: str) -> int:
     date = date.split("-")
     return int("".join(date))
 
+def invert_format_date(date_int: int) -> str:
+    """Invert the formatted date integer back to a string."""
+    date_str = str(date_int)
+    # Ensure the date string is in the correct format
+    if len(date_str) != 8:
+        raise ValueError("The input integer must be in the format YYYYMMDD.")
 
+    year = date_str[:4]
+    month = date_str[4:6]
+    day = date_str[6:]
+
+    return f"{year}-{month}-{day}"
 

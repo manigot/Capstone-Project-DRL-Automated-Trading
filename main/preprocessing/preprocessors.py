@@ -151,7 +151,7 @@ def preprocess_data() -> pd.DataFrame:
     df = load_dataset(file_name=config.TRAINING_DATA_TEST_FILE)
 
     # Filter data after 2009
-    df = df[df["datadate"] >= 20090000]
+    df = df[df["datadate"] >= 20050000]
 
     # Calculate adjusted price
     # df_preprocess = calculate_price(df)

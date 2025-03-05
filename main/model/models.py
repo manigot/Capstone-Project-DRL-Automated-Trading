@@ -154,6 +154,7 @@ def DRL_prediction(
     pd.DataFrame({"last_state": last_state}).to_csv(
         config.Csv_files_dir + f"last_state_{name}_{iter_num}.csv", index=False
     )
+    print(last_state)
     return last_state
 
 
@@ -320,5 +321,10 @@ def run_ensemble_strategy(
             turbulence_threshold,
             initial,
         )
+
+    pd.DataFrame(ppo_sharpe_list).to_csv(config.Csv_files_dir + "ppo_sharpe_list.csv")
+    pd.DataFrame(a2c_sharpe_list).to_csv(config.Csv_files_dir + "a2c_sharpe_list.csv")
+    pd.DataFrame(ddpg_sharpe_list).to_csv(config.Csv_files_dir + "ddpg_sharpe_list.csv")
+    pd.DataFrame(model_use).to_csv(config.Csv_files_dir + "model_use.csv")
 
     print("Ensemble Strategy took:", (time.time() - start) / 60, "minutes")

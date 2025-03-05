@@ -22,6 +22,9 @@ from config.config import *
 # import time
 # from stable_baselines3.common.vec_env import DummyVecEnv
 
+os.makedirs(TRAINED_MODEL_DIR)
+os.makedirs(Csv_files_dir)
+
 def run_model(preprocessed_data = "done_data") -> None:
     """Train the model."""
 
