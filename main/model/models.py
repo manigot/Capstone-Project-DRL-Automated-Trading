@@ -140,6 +140,10 @@ def DRL_prediction(
     for i in range(len(trade_data.index.unique())):
         action, _ = model.predict(obs_trade)
         _, _, _, _ = env_trade.step(action)
+        state = env_trade.envs[0].render()
+        pd.DataFrame({"last_state": state}).to_csv(
+            config.Csv_files_dir + f"last_state_{name}_{iter_num}.csv", index=False
+        )
         if i == (len(trade_data.index.unique()) - 2):
             last_state = env_trade.envs[0].render()
 
