@@ -8,6 +8,7 @@ from preprocessing.preprocessors import add_turbulence, preprocess_data
 from api.get_data import gather_data
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from config.config import *
+from main.backtesting.backtesting import save_all_results
 
 # preprocessor
 # from preprocessing.preprocessors import *
@@ -24,10 +25,15 @@ from config.config import *
 
 os.makedirs(TRAINED_MODEL_DIR)
 os.makedirs(Csv_files_dir)
+os.makedirs(Csv_files_dir + "report/")
+os.makedirs(Csv_files_dir + "account_value_validation/")
+os.makedirs(Csv_files_dir + "account_value_trade/")
+os.makedirs(Csv_files_dir + "account_rewards_trade/")
+os.makedirs(Csv_files_dir + "last_states/")
 
 def run_model(preprocessed_data = "done_data") -> None:
     """Train the model."""
-
+    print(date)
     # read and preprocess data
     preprocessed_path = "main/data/" + preprocessed_data + start_date + "_" + end_date + ".csv"
     if os.path.exists(preprocessed_path):
@@ -62,6 +68,15 @@ def run_model(preprocessed_data = "done_data") -> None:
         rebalance_window=rebalance_window,
         validation_window=validation_window,
     )
+
+    save_all_results(
+        start_date=start_date, 
+        end_date=end_date, 
+        validation_date=validation_date, 
+        rebalance_window=rebalance_window, 
+        validation_window=validation_window, 
+        date=date, preprocessed_data='done_data', 
+        Csv_files_dir='results/{}'.format(date))
 
     # _logger.info(f"saving model version: {_version}")
 

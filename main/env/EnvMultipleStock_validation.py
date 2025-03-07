@@ -166,12 +166,12 @@ class StockEnvValidation(gym.Env):
         if self.terminal:
             plt.plot(self.asset_memory, "r")
             plt.savefig(
-                Csv_files_dir+"account_value_validation_{}.png".format(self.iteration)
+                Csv_files_dir+"account_value_trade/account_value_validation_{}.png".format(self.iteration)
             )
             plt.close()
             df_total_value = pd.DataFrame(self.asset_memory)
             df_total_value.to_csv(
-                Csv_files_dir+"account_value_validation_{}.csv".format(self.iteration)
+                Csv_files_dir+"account_value_validation/account_value_validation_{}.csv".format(self.iteration)
             )
             end_total_asset = self.state[0] + sum(
                 np.array(self.state[1 : (STOCK_DIM + 1)])

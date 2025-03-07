@@ -27,6 +27,7 @@ import sys
 
 now = datetime.datetime.now().strftime('%Y-%m-%d %H;%M;%S')
 TRAINED_MODEL_DIR = f"trained_models/{now}"
+date = now
 Csv_files_dir = f"results/{now}/"
 
 
