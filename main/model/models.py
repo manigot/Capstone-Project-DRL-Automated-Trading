@@ -139,22 +139,22 @@ def DRL_prediction(
     last_state = None  # Initialize
     for i in range(len(trade_data.index.unique())):
         action, _ = model.predict(obs_trade)
-        _, _, _, _ = env_trade.step(action)
+        env_trade.step(action)
         state = env_trade.envs[0].render()
-        pd.DataFrame({"last_state": state}).to_csv(
-            config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num  - rebalance_window + i}.csv", index=False
-        )
-        print(iter_num  - rebalance_window + i, iter_num)
+        if name == 'ensemble':
+            pd.DataFrame({"last_state": state}).to_csv(
+                config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num  - rebalance_window + i + 1}.csv", index=False
+            )
         if i == (len(trade_data.index.unique()) - 2):
             last_state = env_trade.envs[0].render()
 
     if last_state is None:
         print("Warning: last_state is still None!")
-
-    pd.DataFrame({"last_state": last_state}).to_csv(
-        config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num}.csv", index=False
-    )
-    # print(last_state)
+    print(last_state)
+    if name == 'ensemble':
+        pd.DataFrame({"last_state": last_state}).to_csv(
+            config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num}.csv", index=False
+        )
     return last_state
 
 def DRL_validation(model, test_data, test_env, test_obs):
