@@ -142,8 +142,9 @@ def DRL_prediction(
         _, _, _, _ = env_trade.step(action)
         state = env_trade.envs[0].render()
         pd.DataFrame({"last_state": state}).to_csv(
-            config.Csv_files_dir + "last_states/" + name + f"last_state_{name}_{iter_num}.csv", index=False
+            config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num  - rebalance_window + i}.csv", index=False
         )
+        print(iter_num  - rebalance_window + i, iter_num)
         if i == (len(trade_data.index.unique()) - 2):
             last_state = env_trade.envs[0].render()
 
@@ -151,7 +152,7 @@ def DRL_prediction(
         print("Warning: last_state is still None!")
 
     pd.DataFrame({"last_state": last_state}).to_csv(
-        config.Csv_files_dir + "last_states/" + name + f"last_state_{name}_{iter_num}.csv", index=False
+        config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num}.csv", index=False
     )
     # print(last_state)
     return last_state

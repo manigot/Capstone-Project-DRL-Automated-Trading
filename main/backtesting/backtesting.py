@@ -112,6 +112,71 @@ def save_portfolio_vs_djia_plot(ensemble_account_value, a2c_account_value, ppo_a
     plt.tight_layout()
     plt.savefig(file_path)
     plt.show()
+    print(f"Plot portfolio vs DJIA vs others saved to {file_path}")
+
+def save_portfolio_vs_djia_only(ensemble_account_value, file_path):
+    # Convert 'datadate' to datetime
+    ensemble_account_value['datadate'] = pd.to_datetime(ensemble_account_value['datadate'])
+
+    # Fetch & normalize DJIA data
+    djia_data = yf.Ticker('^DJI').history(
+        start=ensemble_account_value['datadate'].min(), 
+        end=ensemble_account_value['datadate'].max()).reset_index()
+    
+    initial_value = 1e6
+    ensemble_account_value['account_value_normalized'] = (
+        ensemble_account_value['account_value'] * (initial_value / ensemble_account_value['account_value'].iloc[0])
+    )
+    djia_data['Close_normalized'] = djia_data['Close'] * (initial_value / djia_data['Close'].iloc[0])
+
+    # Plot setup avec une largeur réduite
+    plt.figure(figsize=(9, 6))  # largeur réduite de 12 à 9
+    plt.plot(ensemble_account_value['datadate'], ensemble_account_value['account_value_normalized'], 
+             '-', color='blue', label="Ensemble Approach")
+    plt.plot(djia_data['Date'], djia_data['Close_normalized'], 
+             '--', color='orange', label="DJIA")
+
+    # Position des labels pour annotations
+    mid_idx = len(ensemble_account_value) // 2
+    mid_date = ensemble_account_value['datadate'].iloc[mid_idx]
+
+    # Ajustement spécifique pour Portfolio : encore plus haut et plus à gauche
+    text_offset_portfolio = pd.Timedelta(days=30)  # Moins que DJIA pour être plus à gauche
+    y_offset_portfolio = 1.8  # Encore plus haut
+
+    text_offset_djia = pd.Timedelta(days=50)
+    y_offset_djia = -1  # DJIA reste en dessous
+
+    # Ajouter les annotations avec flèches en pointillés
+    for label, data, color, text_offset, y_offset in [
+        ("Ensemble Approach", (mid_date, ensemble_account_value['account_value_normalized'].iloc[mid_idx]), 
+         'blue', text_offset_portfolio, y_offset_portfolio),
+        ("DJIA", (mid_date, djia_data['Close_normalized'].iloc[len(djia_data) // 2]), 
+         'orange', text_offset_djia, y_offset_djia)
+    ]:
+        plt.annotate(
+            label, 
+            xy=data, 
+            xytext=(data[0] + text_offset, data[1] + y_offset * 0.15 * initial_value),
+            fontsize=12, color=color, fontweight='bold',
+            bbox=dict(boxstyle="round,pad=0.4", edgecolor=color, facecolor="white", alpha=0.9),
+            arrowprops=dict(arrowstyle="->", linestyle="dotted", color=color)
+        )
+
+    # Ajustements et sauvegarde avec résolution plus élevée (300 dpi) et taille de police à 12
+    plt.xlabel("Dates", fontsize=12)
+    plt.ylabel("Value", fontsize=12)
+    plt.title("Ensemble Approach vs Dow Jones Industrial Average", fontsize=12)
+    plt.legend(fontsize=12)
+    plt.gca().xaxis.set_major_locator(mdates.MonthLocator(bymonth=[1, 7]))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    plt.xticks(rotation=45, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.tight_layout()
+    plt.savefig(file_path, dpi=300)  # Enregistrer avec 300 dpi pour une résolution plus élevée
+    plt.show()
+
+
 
 # Function to save the combined DataFrame
 def save_combined_df(ppo_sharpe_list, a2c_sharpe_list, ddpg_sharpe_list, model_use, ensemble_account_value, file_path):
@@ -208,6 +273,8 @@ def save_all_results(start_date, end_date, rebalance_window, validation_window, 
     save_portfolio_vs_djia_plot(ensemble_account_value, a2c_account_value, ppo_account_value, ddpg_account_value, '{}/report/portfolio_vs_djia_vs_ppo_vs_a2c_vs_ddpg.png'.format(Csv_files_dir))
     save_combined_df(ppo_sharpe_list, a2c_sharpe_list, ddpg_sharpe_list, model_use, ensemble_account_value, '{}/report/results_algos.csv'.format(Csv_files_dir))
     save_metrics_df(ensemble_account_value, a2c_account_value, ppo_account_value, ddpg_account_value, '{}/report/results_metrics.csv'.format(Csv_files_dir))
+    save_portfolio_vs_djia_only(ensemble_account_value, '{}/report/portfolio_vs_djia.png'.format(Csv_files_dir))
+
 
 # Example usage
 # Load your data here   
