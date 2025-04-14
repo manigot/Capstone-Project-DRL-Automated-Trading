@@ -56,6 +56,9 @@ def run_model(preprocessed_data = "done_data") -> None:
         (data["datadate"] > format_date(validation_date)) & (data["datadate"] <= format_date(end_date))
     ]["datadate"].unique()
     print(unique_trade_date)
+    pd.DataFrame(unique_trade_date).to_csv(
+        Csv_files_dir + "unique_trade_date.csv", index=False
+    )
 
     # rebalance_window is the number of day to retrain the model
     # validation_window is the number of day to validation the model
