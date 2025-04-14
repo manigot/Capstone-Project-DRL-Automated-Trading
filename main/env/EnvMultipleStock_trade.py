@@ -146,53 +146,50 @@ class StockEnvTrade(gym.Env):
     def step(self, actions):
         """
         Take a step in the environment.
-
+        
+        The added section below enforces the activity constraint:
+        (1 - δ)·(p_t^T h_t) ≥ δ·b_t, with δ set to 0.95.
+        If the cash (b_t) exceeds (1-δ)/δ times the stock portfolio value (p_t^T h_t),
+        the surplus cash is automatically invested equally among all stocks.
+        
         Args:
             actions (np.ndarray): Actions for each stock.
-
+        
         Returns:
             tuple: (state, reward, terminal, info)
         """
         self.terminal = self.day >= len(self.df.index.unique()) - 1
 
         if self.terminal:
-            # --- Terminal: Save results & compute final stats ---
-
-            # Plot the asset memory
+            # Terminal: save and output statistics.
             plt.plot(self.asset_memory, 'r')
             plt.title("Account Value Over Time")
-            plt.savefig(Csv_files_dir+"account_value_trade/account_value_trade_{}_{}.png".format(self.model_name, self.iteration))
+            plt.savefig(Csv_files_dir + "account_value_trade/account_value_trade_{}_{}.png".format(self.model_name, self.iteration))
             plt.close()
 
-            # Save account values to CSV
             df_total_value = pd.DataFrame(self.asset_memory, columns=['account_value'])
             df_total_value.to_csv(Csv_files_dir + "account_value_trade/account_value_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
-
-            # Compute daily returns and Sharpe ratio
             df_total_value['daily_return'] = df_total_value['account_value'].pct_change(1)
             sharpe = (4 ** 0.5) * df_total_value['daily_return'].mean() / df_total_value['daily_return'].std()
             print("Sharpe Ratio:", sharpe)
 
-            # Save rewards to CSV
             df_rewards = pd.DataFrame(self.rewards_memory, columns=['reward'])
-            df_rewards.to_csv(Csv_files_dir+"account_rewards_trade/account_rewards_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
+            df_rewards.to_csv(Csv_files_dir + "account_rewards_trade/account_rewards_trade_{}_{}.csv".format(self.model_name, self.iteration), index=False)
 
             end_total_asset = self.state[0] + sum(
-                np.array(self.state[1: (STOCK_DIM + 1)]) *
-                np.array(self.state[(STOCK_DIM + 1): (STOCK_DIM * 2 + 1)])
+                np.array(self.state[1:(STOCK_DIM + 1)]) *
+                np.array(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)])
             )
             print("Previous Total Asset:", self.asset_memory[0])
             print("End Total Asset:", end_total_asset)
             print("Total Reward:", end_total_asset - self.asset_memory[0])
             print("Total Cost:", self.cost)
             print("Total Trades:", self.trades)
-
             return self.state, self.reward, self.terminal, {}
 
         # --- Not terminal: Proceed with step logic ---
         actions = actions * HMAX_NORMALIZE
 
-        # If turbulence is high, force all sell
         if self.turbulence >= self.turbulence_threshold:
             actions = np.array([-HMAX_NORMALIZE] * STOCK_DIM)
 
@@ -205,41 +202,73 @@ class StockEnvTrade(gym.Env):
         sell_index = np.argsort(actions)[: np.where(actions < 0)[0].shape[0]]
         buy_index = np.argsort(actions)[::-1][: np.where(actions > 0)[0].shape[0]]
 
-        # Execute sells
         for index in sell_index:
             self._sell_stock(index, actions[index])
-
-        # Execute buys
         for index in buy_index:
             self._buy_stock(index, actions[index])
 
         self.day += 1
         self.data = self.df.loc[self.day, :]
-        # Update turbulence
         self.turbulence = self.data["turbulence"].iloc[0]
 
-        # Build next state
+        # Build the new state using the new market data and existing share holdings.
         self.state = (
-            [self.state[0]]
-            + self.data["adjcp"].tolist()
-            + list(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)])
-            + self.data["macd"].tolist()
-            + self.data["rsi"].tolist()
-            + self.data["cci"].tolist()
-            + self.data["adx"].tolist()
+            [self.state[0]] +
+            self.data["adjcp"].tolist() +
+            list(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)]) +
+            self.data["macd"].tolist() +
+            self.data["rsi"].tolist() +
+            self.data["cci"].tolist() +
+            self.data["adx"].tolist()
         )
 
+        # ===== Added code: Enforce the activity constraint =====
+        # Set δ (delta) to 0.95 for active investment.
+        delta = 0.95
+
+        # Compute current portfolio value (only the invested part) as:
+        # sum_{i=1}^{N} (price_i * shares_i).
+        # Note: Prices are in self.state[1 : STOCK_DIM+1] and shares in self.state[STOCK_DIM+1 : 2*STOCK_DIM+1]
+        portfolio_value = sum(
+            np.array(self.state[1:(STOCK_DIM + 1)]) *
+            np.array(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)])
+        )
+
+        # Calculate the maximum allowed cash using:
+        # allowed_cash = (1-δ)/δ * portfolio_value.
+        allowed_cash = ((1 - delta) / delta) * portfolio_value
+
+        # If current cash (self.state[0]) is greater than allowed, invest the surplus.
+        if self.state[0] > allowed_cash:
+            surplus = self.state[0] - allowed_cash
+            # For simplicity, we invest the surplus equally among all stocks.
+            for index in range(STOCK_DIM):
+                # Get the current price for stock at this index.
+                price = self.state[1 + index]
+                # Allocate an equal fraction of the surplus to this stock.
+                surplus_per_stock = surplus / STOCK_DIM
+                # Determine the integer number of shares to buy given the cost,
+                # accounting for the transaction fee.
+                shares_to_buy = np.floor(surplus_per_stock / (price * (1 + TRANSACTION_FEE_PERCENT)))
+                if shares_to_buy > 0:
+                    total_cost = shares_to_buy * price * (1 + TRANSACTION_FEE_PERCENT)
+                    # Update the cash balance.
+                    self.state[0] -= total_cost
+                    # Update the number of shares held for this stock.
+                    self.state[STOCK_DIM + 1 + index] += shares_to_buy
+                    # Update cumulative transaction cost and count.
+                    self.cost += shares_to_buy * price * TRANSACTION_FEE_PERCENT
+                    self.trades += 1
+        # ===== End added constraint code =====
+
+        # Compute end total asset value using updated state.
         end_total_asset = self.state[0] + sum(
             np.array(self.state[1:(STOCK_DIM + 1)]) *
             np.array(self.state[(STOCK_DIM + 1):(STOCK_DIM * 2 + 1)])
         )
         self.asset_memory.append(end_total_asset)
-
-        # Reward is the increase in total asset
         self.reward = end_total_asset - begin_total_asset
         self.rewards_memory.append(self.reward)
-
-        # Scale the reward
         self.reward *= REWARD_SCALING
 
         return self.state, self.reward, self.terminal, {}

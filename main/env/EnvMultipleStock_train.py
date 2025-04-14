@@ -147,6 +147,33 @@ class StockEnvTrain(gym.Env):
         self.data = self.df.loc[self.day, :]
         self.state = self._update_state()
 
+        # ===== Added Code: Enforce the Activity Constraint =====
+        # Set δ (delta) to 0.95 to require that at most 5% of the portfolio value be held in cash.
+        delta = 0.95
+        # Compute the invested portfolio value: sum of (price * shares held) for all stocks.
+        portfolio_value = sum(
+            np.array(self.state[1 : STOCK_DIM + 1]) *
+            np.array(self.state[STOCK_DIM + 1 : STOCK_DIM * 2 + 1])
+        )
+        # Calculate the maximum allowed cash using: allowed_cash = ((1 - δ)/δ) * portfolio_value.
+        allowed_cash = ((1 - delta) / delta) * portfolio_value
+
+        # If available cash exceeds the allowed amount, invest the surplus equally across all stocks.
+        if self.state[0] > allowed_cash:
+            surplus = self.state[0] - allowed_cash
+            for index in range(STOCK_DIM):
+                price = self.state[1 + index]
+                surplus_per_stock = surplus / STOCK_DIM
+                # Determine the number of shares to buy, accounting for the transaction fee.
+                shares_to_buy = np.floor(surplus_per_stock / (price * (1 + TRANSACTION_FEE_PERCENT)))
+                if shares_to_buy > 0:
+                    total_cost = shares_to_buy * price * (1 + TRANSACTION_FEE_PERCENT)
+                    self.state[0] -= total_cost
+                    self.state[STOCK_DIM + 1 + index] += shares_to_buy
+                    self.cost += shares_to_buy * price * TRANSACTION_FEE_PERCENT
+                    self.trades += 1
+        # ===== End Added Constraint Code =====
+
         # Calculate reward
         end_total_asset = self._calculate_total_asset()
         self.reward = (end_total_asset - begin_total_asset) * REWARD_SCALING
