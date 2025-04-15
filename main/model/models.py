@@ -150,7 +150,6 @@ def DRL_prediction(
 
     if last_state is None:
         print("Warning: last_state is still None!")
-    print(last_state)
     if name == 'ensemble':
         pd.DataFrame({"last_state": last_state}).to_csv(
             config.Csv_files_dir + "last_states/" + name + f"_last_state_{name}_{iter_num}.csv", index=False
