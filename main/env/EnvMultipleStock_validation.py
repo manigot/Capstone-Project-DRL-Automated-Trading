@@ -59,7 +59,7 @@ class StockEnvValidation(gym.Env):
         self.day = day
         self.df = df
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+ STOCK_DIM*6,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+ STOCK_DIM*6 +3,))
         self.data = self.df.loc[self.day, :]
         self.terminal = False
         self.turbulence_threshold = turbulence_threshold
@@ -71,6 +71,9 @@ class StockEnvValidation(gym.Env):
             + self.data["rsi"].to_numpy().tolist()
             + self.data["cci"].to_numpy().tolist()
             + self.data["adx"].to_numpy().tolist()
+            + self.data.volatility.tolist()
+            + self.data.downside_risk.tolist()
+            + self.data.growth_rate.tolist()
         )
         self.reward = 0
         self.turbulence = 0
@@ -216,7 +219,10 @@ class StockEnvValidation(gym.Env):
                 + self.data["macd"].to_numpy().tolist()
                 + self.data["rsi"].to_numpy().tolist()
                 + self.data["cci"].to_numpy().tolist()
-                + self.data["adx"].to_numpy().tolist()
+                + self.data["adx"].to_numpy().tolist()                    
+                + self.data.volatility.tolist()
+                + self.data.downside_risk.tolist()
+                + self.data.growth_rate.tolist()
             )
             end_total_asset = self.state[0] + sum(
                 np.array(self.state[1 : (STOCK_DIM + 1)])
@@ -248,6 +254,9 @@ class StockEnvValidation(gym.Env):
             + self.data["rsi"].to_numpy().tolist()
             + self.data["cci"].to_numpy().tolist()
             + self.data["adx"].to_numpy().tolist()
+            + self.data.volatility.tolist()
+            + self.data.downside_risk.tolist()
+            + self.data.growth_rate.tolist()
         )
         self.reward = 0
         self.turbulence = 0
