@@ -55,7 +55,7 @@ class StockEnvTrain(gym.Env):
 
         # Define action and observation spaces
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+ STOCK_DIM*6,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+ STOCK_DIM*6 +3,))
 
         # Initialize environment state
         self.data = self.df.loc[self.day, :]
@@ -68,6 +68,11 @@ class StockEnvTrain(gym.Env):
             + self.data.rsi.values.tolist()
             + self.data.cci.values.tolist()
             + self.data.adx.values.tolist()
+            + [  # Market trend indicators
+                self.data["volatility"].iloc[0],
+                self.data["downside_risk"].iloc[0],
+                self.data["growth_rate"].iloc[0]
+            ]
         )
         self.reward = 0
         self.cost = 0
@@ -177,6 +182,9 @@ class StockEnvTrain(gym.Env):
             + self.data.rsi.values.tolist()
             + self.data.cci.values.tolist()
             + self.data.adx.values.tolist()
+            + self.data.volatility.tolist()
+            + self.data.downside_risk.tolist()
+            + self.data.growth_rate.tolist()
         )
         return self.state
 
@@ -246,4 +254,7 @@ class StockEnvTrain(gym.Env):
             + self.data.rsi.values.tolist()
             + self.data.cci.values.tolist()
             + self.data.adx.values.tolist()
+            + self.data.volatility.tolist()
+            + self.data.downside_risk.tolist()
+            + self.data.growth_rate.tolist()
         )
