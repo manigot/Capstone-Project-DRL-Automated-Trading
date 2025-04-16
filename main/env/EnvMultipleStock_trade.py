@@ -65,7 +65,7 @@ class StockEnvTrade(gym.Env):
         self.previous_state = previous_state or []
         self.action_space = spaces.Box(low=-1, high=1, shape=(STOCK_DIM,))
         # Shape: 1 (balance) + 30 (prices) + 30 (shares) + 30 (MACD) + 30 (RSI) + 30 (CCI) + 30 (ADX) = 181
-        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+STOCK_DIM*6,))
+        self.observation_space = spaces.Box(low=0, high=np.inf, shape=(1+STOCK_DIM*6 +3,))
 
         # Load the initial slice of data
         self.data = self.df.loc[self.day, :]
@@ -81,6 +81,9 @@ class StockEnvTrade(gym.Env):
             + self.data["rsi"].tolist()
             + self.data["cci"].tolist()
             + self.data["adx"].tolist()
+            + self.data.volatility.tolist()
+            + self.data.downside_risk.tolist()
+            + self.data.growth_rate.tolist()
         )
 
         self.reward = 0
@@ -227,6 +230,9 @@ class StockEnvTrade(gym.Env):
             + self.data["rsi"].tolist()
             + self.data["cci"].tolist()
             + self.data["adx"].tolist()
+            + self.data.volatility.tolist()
+            + self.data.downside_risk.tolist()
+            + self.data.growth_rate.tolist()
         )
 
         end_total_asset = self.state[0] + sum(
@@ -269,7 +275,10 @@ class StockEnvTrade(gym.Env):
                 + self.data["macd"].tolist()
                 + self.data["rsi"].tolist()
                 + self.data["cci"].tolist()
-                + self.data["adx"].tolist()
+                + self.data["adx"].tolist()       
+                + self.data.volatility.tolist()
+                + self.data.downside_risk.tolist()
+                + self.data.growth_rate.tolist()
             )
         else:
             # Use previous_state to resume
@@ -297,6 +306,9 @@ class StockEnvTrade(gym.Env):
                 + self.data["rsi"].tolist()
                 + self.data["cci"].tolist()
                 + self.data["adx"].tolist()
+                + self.data.volatility.tolist()
+                + self.data.downside_risk.tolist()
+                + self.data.growth_rate.tolist()
             )
 
         return self.state
